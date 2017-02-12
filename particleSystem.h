@@ -12,7 +12,7 @@ class particleSystem {
 
 public:
     particleSystem(int numParticles, glm::vec3 bounds);
-    std::vector<glm::vec3> getParticles() { return particles; }
+    std::vector<glm::vec3> &getParticles() { return particles; }
 
 private:
     std::vector<glm::vec3> particles;

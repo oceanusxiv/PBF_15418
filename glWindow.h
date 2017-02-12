@@ -17,7 +17,7 @@ public:
     glWindow(int width, int height) :
             width(width),
             height(height),
-            camera(glm::vec3(0.0f, 0.0f, 3.0f)),
+            camera(glm::vec3(0.5f, 2.0f, 3.0f)),
             firstMouse(true),
             lastX(width/2),
             lastY(height/2),

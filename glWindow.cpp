@@ -46,6 +46,9 @@ int glWindow::init() {
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_CLAMP);
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
     int w, h;
     glfwGetFramebufferSize(window, &w, &h);

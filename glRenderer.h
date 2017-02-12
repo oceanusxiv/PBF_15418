@@ -17,12 +17,13 @@
 class glRenderer {
 
 public:
-    glRenderer(int width, int height, Camera& camera) :
-            shader("shaders/triangle_vs.glsl", "shaders/triangle_fs.glsl"),
+    glRenderer(int width, int height, Camera& camera, std::vector<glm::vec3> &particles) :
+            particleShader("shaders/triangle_vs.glsl", "shaders/triangle_fs.glsl"),
             skyBoxShader("shaders/skybox_vs.glsl", "shaders/skybox_fs.glsl"),
             width(width),
             height(height),
-            camera(camera) {}
+            camera(camera),
+            particles(particles) {}
     ~glRenderer();
     int init();
     void onDraw();
@@ -75,9 +76,12 @@ private:
     }
     void setupSkyBox();
     void drawSkyBox(glm::mat4 projection);
+    void setupParticles();
+    void drawParticles(glm::mat4 projection);
     Camera &camera;
-    GLuint vao, vbo, skyBoxVao, skyBoxVbo, cubeMapTexture;
-    Shader shader, skyBoxShader;
+    std::vector<glm::vec3> &particles;
+    GLuint particleVao, particleVbo, skyBoxVao, skyBoxVbo, cubeMapTexture;
+    Shader particleShader, skyBoxShader;
     int width, height;
     static const GLfloat skyBoxVertices[108];
 };

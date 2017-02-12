@@ -7,12 +7,12 @@
 
 int main() {
 
-    particleSystem sim(1000, glm::vec3(1, 1, 1));
+    particleSystem sim(100000, glm::vec3(1, 0.1, 1));
 
     glWindow simWindow(800, 600);
     simWindow.init();
 
-    glRenderer simRenderer(800, 600, simWindow.getCamera());
+    glRenderer simRenderer(800, 600, simWindow.getCamera(), sim.getParticles());
     simRenderer.init();
 
     while(!glfwWindowShouldClose(simWindow.getWindow()))
