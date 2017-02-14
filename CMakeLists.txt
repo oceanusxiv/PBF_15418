@@ -7,16 +7,22 @@ find_package(OpenGL REQUIRED)
 find_package( PkgConfig )
 pkg_search_module(GLFW REQUIRED glfw3)
 
-IF(APPLE)
+if(APPLE)
     INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     MARK_AS_ADVANCED (COCOA_LIBRARY)
     SET(EXTRA_LIBS ${COCOA_LIBRARY})
-ENDIF (APPLE)
+endif (APPLE)
+
+if(LINUX)
+    include_directories(~/private/glm/glm)
+endif(LINUX)
 
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIR})
+
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
