@@ -14,9 +14,9 @@ if(APPLE)
     SET(EXTRA_LIBS ${COCOA_LIBRARY})
 endif (APPLE)
 
-if(LINUX)
-    include_directories(~/private/glm/glm)
-endif(LINUX)
+
+    include_directories(/afs/andrew.cmu.edu/usr8/efang/private/glm)
+
 
 include_directories(${GLFW_INCLUDE_DIRS})
 include_directories(${GLEW_INCLUDE_DIRS})
@@ -33,6 +33,9 @@ add_executable(PBF_15418 ${SOURCE_FILES})
 
 if(APPLE)
     target_link_libraries(PBF_15418 ${EXTRA_LIBS})
+    set(SOIL2_DIR ${CMAKE_SOURCE_DIR}/lib/libsoil2.a)
+else(APPLE)
+    set(SOIL2_DIR ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
 endif(APPLE)
 
-target_link_libraries(PBF_15418 ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${CMAKE_SOURCE_DIR}/lib/libSOIL2.a)
+target_link_libraries(PBF_15418 ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${SOIL2_DIR})
