@@ -17,6 +17,8 @@ int glWindow::init() {
         return 1;
     }
 
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
     if (OSX) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);

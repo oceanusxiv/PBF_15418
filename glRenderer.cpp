@@ -49,32 +49,59 @@ const GLfloat glRenderer::skyBoxVertices[108] = {
         1.0f, -1.0f,  1.0f
 };
 
+const GLfloat glRenderer::quadVertices[18] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,
+};
+
 int glRenderer::init() {
 
     setupParticles();
 
     setupSkyBox();
 
+    setupQuad();
+
+    textureOne = setupTexture();
+
+    textureTwo = setupTexture();
+
+    firstFBO = setupFBO(textureOne);
+
+    secondFBO = setupFBO(textureTwo);
+
+
+
     return 0;
 }
 
 void glRenderer::onDraw() {
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+
     glm::mat4 projection = glm::perspective(camera.Zoom, (float)width/(float)height, 0.1f, 100.f);
 
-    drawParticles(projection);
+    depthPass(projection, firstFBO, textureOne);
+    shadingPass(projection, textureOne);
+
     drawSkyBox(projection);
 }
 
 void glRenderer::setupSkyBox() {
 
-    glGenVertexArrays(1, &skyBoxVao);
-    glGenBuffers(1, &skyBoxVbo);
-    glBindVertexArray(skyBoxVao);
-    glBindBuffer(GL_ARRAY_BUFFER, skyBoxVbo);
+    glGenVertexArrays(1, &skyBoxVAO);
+    glGenBuffers(1, &skyBoxVBO);
+    glBindVertexArray(skyBoxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyBoxVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), &skyBoxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     std::vector<const GLchar*> faces;
@@ -95,7 +122,7 @@ void glRenderer::drawSkyBox(glm::mat4 projection) {
     glUniformMatrix4fv(glGetUniformLocation(skyBoxShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(skyBoxShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     // skybox cube
-    glBindVertexArray(skyBoxVao);
+    glBindVertexArray(skyBoxVAO);
     glActiveTexture(GL_TEXTURE0);
     //glUniform1i(glGetUniformLocation(shader.Program, "skybox"), 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
@@ -104,16 +131,20 @@ void glRenderer::drawSkyBox(glm::mat4 projection) {
     glDepthFunc(GL_LESS); // Set depth function back to default
 }
 
-void glRenderer::setupParticles() {
+void glRenderer::blurPass(glm::mat4 projection, GLuint VBO, GLuint textureIn, GLuint textureOut, int direction) {
 
-    glGenBuffers(1, &particleVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, particleVbo);
-    glBufferData(GL_ARRAY_BUFFER, particles.size() * sizeof(glm::vec3), &particles[0].x, GL_STATIC_DRAW);
+    glBindFramebuffer(GL_FRAMEBUFFER, VBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureOut, 0);
+}
 
-    glGenVertexArrays(1, &particleVao);
-    glBindVertexArray(particleVao);
+void glRenderer::setupQuad() {
 
-    glBindBuffer(GL_ARRAY_BUFFER, particleVbo);
+    glGenBuffers(1, &quadVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &quadVAO);
+    glBindVertexArray(quadVAO);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
@@ -122,32 +153,118 @@ void glRenderer::setupParticles() {
     glBindVertexArray(0);
 }
 
-void glRenderer::drawParticles(glm::mat4 projection) {
+GLuint glRenderer::setupFBO(GLuint texture) {
 
-    particleShader.Use();
+    GLuint FBO;
+
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0);
+    // No color output in the bound framebuffer, only depth.
+    glDrawBuffer(GL_NONE);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "framebuffer not ok!" << std::endl;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return FBO;
+}
+
+GLuint glRenderer::setupTexture() {
+
+    GLint dims[4] = {0};
+    glGetIntegerv(GL_VIEWPORT, dims);
+    GLint fbWidth = dims[2];
+    GLint fbHeight = dims[3];
+
+    GLuint texture;
+
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, fbWidth, fbHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return texture;
+}
+
+void glRenderer::setupParticles() {
+
+    glGenBuffers(1, &particleVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
+    glBufferData(GL_ARRAY_BUFFER, particles.size() * sizeof(glm::vec3), &particles[0].x, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &particleVAO);
+    glBindVertexArray(particleVAO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) {
+
+    depthShader.Use();
 
     // Create camera transformation
     glm::mat4 model;
     glm::mat4 view = camera.GetViewMatrix();
 
-    GLfloat pointRadius = 0.02f;
+    GLfloat pointRadius = 0.01f;
     GLfloat pointScale = 1000.0f;
 
     // Pass the matrices to the shader
-    glUniformMatrix4fv(glGetUniformLocation(particleShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(glGetUniformLocation(particleShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(particleShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    glUniform1f(glGetUniformLocation(particleShader.Program, "pointRadius"), pointRadius);
-    glUniform1f(glGetUniformLocation(particleShader.Program, "pointScale"), pointScale);
+    glUniformMatrix4fv(glGetUniformLocation(depthShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(depthShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(glGetUniformLocation(depthShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform1f(glGetUniformLocation(depthShader.Program, "pointRadius"), pointRadius);
+    glUniform1f(glGetUniformLocation(depthShader.Program, "pointScale"), pointScale);
 
-    glBindVertexArray(particleVao);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureOut, 0);
+
+    glBindVertexArray(particleVAO);
     glDrawArrays(GL_POINTS, 0, particles.size());
     glBindVertexArray(0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void glRenderer::shadingPass(glm::mat4 projection, GLuint textureIn) {
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    shadingShader.Use();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureIn);
+
+    glUniform1i(glGetUniformLocation(shadingShader.Program, "renderedTexture"), 0);
+    glUniformMatrix4fv(glGetUniformLocation(shadingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
 }
 
 glRenderer::~glRenderer() {
-    glDeleteVertexArrays(1, &particleVao);
-    glDeleteVertexArrays(1, &skyBoxVao);
-    glDeleteBuffers(1, &particleVbo);
-    glDeleteBuffers(1, &skyBoxVbo);
+    glDeleteVertexArrays(1, &particleVAO);
+    glDeleteVertexArrays(1, &skyBoxVAO);
+    glDeleteBuffers(1, &particleVBO);
+    glDeleteBuffers(1, &skyBoxVBO);
 }

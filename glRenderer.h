@@ -18,8 +18,10 @@ class glRenderer {
 
 public:
     glRenderer(int width, int height, Camera& camera, std::vector<glm::vec3> &particles) :
-            particleShader("shaders/triangle_vs.glsl", "shaders/triangle_fs.glsl"),
+            depthShader("shaders/depth_vs.glsl", "shaders/depth_fs.glsl"),
             skyBoxShader("shaders/skybox_vs.glsl", "shaders/skybox_fs.glsl"),
+            blurShader("shaders/texture_vs.glsl", "shaders/blur_fs.glsl"),
+            shadingShader("shaders/texture_vs.glsl", "shaders/shading_fs.glsl"),
             width(width),
             height(height),
             camera(camera),
@@ -77,13 +79,20 @@ private:
     void setupSkyBox();
     void drawSkyBox(glm::mat4 projection);
     void setupParticles();
-    void drawParticles(glm::mat4 projection);
+    void depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut);
+    void blurPass(glm::mat4 projection, GLuint VBO, GLuint textureIn, GLuint textureOut, int direction);
+    void shadingPass(glm::mat4 projection, GLuint textureIn);
+    void setupQuad();
+    GLuint setupFBO(GLuint texture);
+    GLuint setupTexture();
     Camera &camera;
     std::vector<glm::vec3> &particles;
-    GLuint particleVao, particleVbo, skyBoxVao, skyBoxVbo, cubeMapTexture;
-    Shader particleShader, skyBoxShader;
+    GLuint particleVAO, particleVBO, skyBoxVAO, skyBoxVBO, cubeMapTexture, quadVAO, quadVBO,
+            firstFBO, secondFBO, textureOne, textureTwo;
+    Shader depthShader, skyBoxShader, blurShader, shadingShader;
     int width, height;
     static const GLfloat skyBoxVertices[108];
+    static const GLfloat quadVertices[18];
 };
 
 

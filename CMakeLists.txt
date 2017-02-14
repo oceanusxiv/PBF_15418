@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 2.8)
 project(PBF_15418)
 
 find_package(glfw3 3.2 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package( PkgConfig )
+
 
 IF(APPLE)
     INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
@@ -18,7 +20,8 @@ include_directories(${OPENGL_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h particleSystem.cpp particleSystem.h Camera.h SOIL2.h)
+set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h particleSystem.cpp
+        particleSystem.h Camera.h SOIL2.h)
 
 add_executable(PBF_15418 ${SOURCE_FILES})
 
