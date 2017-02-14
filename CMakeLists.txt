@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 project(PBF_15418)
 
-find_package(glfw3 3.2 REQUIRED)
+#find_package(glfw3 3.2 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package( PkgConfig )
-
+pkg_search_module(GLFW REQUIRED glfw3)
 
 IF(APPLE)
     INCLUDE_DIRECTORIES ( /System/Library/Frameworks )

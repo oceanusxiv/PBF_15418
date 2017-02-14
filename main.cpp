@@ -1,5 +1,3 @@
-
-#include <GLFW/glfw3.h>
 #include "glWindow.h"
 #include "glRenderer.h"
 #include "particleSystem.h"
