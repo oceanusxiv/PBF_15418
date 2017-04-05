@@ -87,6 +87,8 @@ void glRenderer::onDraw() {
     glm::mat4 projection = glm::perspective(camera.Zoom, (float)width/(float)height, 0.1f, 100.f);
 
     depthPass(projection, firstFBO, textureOne);
+    blurPass(projection, secondFBO, textureOne, textureTwo, 0);
+    blurPass(projection, firstFBO, textureTwo, textureOne, 1);
     shadingPass(projection, textureOne);
 
     drawSkyBox(projection);
@@ -131,10 +133,25 @@ void glRenderer::drawSkyBox(glm::mat4 projection) {
     glDepthFunc(GL_LESS); // Set depth function back to default
 }
 
-void glRenderer::blurPass(glm::mat4 projection, GLuint VBO, GLuint textureIn, GLuint textureOut, int direction) {
+void glRenderer::blurPass(glm::mat4 projection, GLuint FBO, GLuint textureIn, GLuint textureOut, int direction) {
 
-    glBindFramebuffer(GL_FRAMEBUFFER, VBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureOut, 0);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    blurShader.Use();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureIn);
+
+    glUniform1i(glGetUniformLocation(blurShader.Program, "renderedTexture"), 0);
+    glUniformMatrix4fv(glGetUniformLocation(blurShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniform1i(glGetUniformLocation(blurShader.Program, "direction"), direction);
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 }
 
 void glRenderer::setupQuad() {
@@ -220,7 +237,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
     glm::mat4 model;
     glm::mat4 view = camera.GetViewMatrix();
 
-    GLfloat pointRadius = 0.01f;
+    GLfloat pointRadius = 0.04f;
     GLfloat pointScale = 1000.0f;
 
     // Pass the matrices to the shader
@@ -231,7 +248,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
     glUniform1f(glGetUniformLocation(depthShader.Program, "pointScale"), pointScale);
 
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-    //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureOut, 0);
 
@@ -245,7 +262,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
 void glRenderer::shadingPass(glm::mat4 projection, GLuint textureIn) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shadingShader.Use();
@@ -253,7 +270,14 @@ void glRenderer::shadingPass(glm::mat4 projection, GLuint textureIn) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureIn);
 
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+
+    //glm::mat4 view = camera.GetViewMatrix();
+
     glUniform1i(glGetUniformLocation(shadingShader.Program, "renderedTexture"), 0);
+    glUniform1i(glGetUniformLocation(shadingShader.Program, "skybox"), 1);
+    //glUniformMatrix4fv(glGetUniformLocation(depthShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shadingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     glBindVertexArray(quadVAO);

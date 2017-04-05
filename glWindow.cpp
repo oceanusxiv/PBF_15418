@@ -49,7 +49,7 @@ int glWindow::init() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_CLAMP);
-
+    glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_PROGRAM_POINT_SIZE);
 
     int w, h;

@@ -17,11 +17,11 @@
 class glRenderer {
 
 public:
-    glRenderer(int width, int height, Camera& camera, std::vector<glm::vec3> &particles) :
-            depthShader("shaders/depth_vs.glsl", "shaders/depth_fs.glsl"),
-            skyBoxShader("shaders/skybox_vs.glsl", "shaders/skybox_fs.glsl"),
-            blurShader("shaders/texture_vs.glsl", "shaders/blur_fs.glsl"),
-            shadingShader("shaders/texture_vs.glsl", "shaders/shading_fs.glsl"),
+    glRenderer(int width, int height, Camera& camera, std::vector<glm::vec3> &particles, std::string shaderPath) :
+            depthShader(shaderPath + "depth_vs.glsl", shaderPath + "depth_fs.glsl"),
+            skyBoxShader(shaderPath + "skybox_vs.glsl", shaderPath + "skybox_fs.glsl"),
+            blurShader(shaderPath + "texture_vs.glsl", shaderPath + "blur_fs.glsl"),
+            shadingShader(shaderPath + "texture_vs.glsl", shaderPath + "shading_fs.glsl"),
             width(width),
             height(height),
             camera(camera),
@@ -80,15 +80,16 @@ private:
     void drawSkyBox(glm::mat4 projection);
     void setupParticles();
     void depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut);
-    void blurPass(glm::mat4 projection, GLuint VBO, GLuint textureIn, GLuint textureOut, int direction);
+    void blurPass(glm::mat4 projection, GLuint FBO, GLuint textureIn, GLuint textureOut, int direction);
     void shadingPass(glm::mat4 projection, GLuint textureIn);
+    void thicknessPass(glm::mat4 projection, GLuint FBO, GLuint textureOut);
     void setupQuad();
     GLuint setupFBO(GLuint texture);
     GLuint setupTexture();
     Camera &camera;
     std::vector<glm::vec3> &particles;
     GLuint particleVAO, particleVBO, skyBoxVAO, skyBoxVBO, cubeMapTexture, quadVAO, quadVBO,
-            firstFBO, secondFBO, textureOne, textureTwo;
+            firstFBO, secondFBO, thicknessTexture, textureOne, textureTwo;
     Shader depthShader, skyBoxShader, blurShader, shadingShader;
     int width, height;
     static const GLfloat skyBoxVertices[108];

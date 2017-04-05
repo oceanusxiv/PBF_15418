@@ -7,7 +7,6 @@
 *.iml
 out
 gen
-.gitignore
 .idea/
 cmake-build-debug/
 Would skip repository lib/glfw/
