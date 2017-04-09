@@ -12,20 +12,22 @@
 #include <vector>
 #include "shader.h"
 #include "Camera.h"
+#include "particleSystem.h"
 
 
 class glRenderer {
 
 public:
-    glRenderer(int width, int height, Camera& camera, std::vector<glm::vec3> &particles, std::string shaderPath) :
-            depthShader(shaderPath + "depth_vs.glsl", shaderPath + "depth_fs.glsl"),
-            skyBoxShader(shaderPath + "skybox_vs.glsl", shaderPath + "skybox_fs.glsl"),
-            blurShader(shaderPath + "texture_vs.glsl", shaderPath + "blur_fs.glsl"),
-            shadingShader(shaderPath + "texture_vs.glsl", shaderPath + "shading_fs.glsl"),
+    glRenderer(int width, int height, Camera& camera, particleSystem &sim, std::string srcPath) :
+            depthShader(srcPath + "shaders/depth_vs.glsl", srcPath + "shaders/depth_fs.glsl"),
+            skyBoxShader(srcPath + "shaders/skybox_vs.glsl", srcPath + "shaders/skybox_fs.glsl"),
+            blurShader(srcPath + "shaders/texture_vs.glsl", srcPath + "shaders/blur_fs.glsl"),
+            shadingShader(srcPath + "shaders/texture_vs.glsl", srcPath + "shaders/shading_fs.glsl"),
             width(width),
             height(height),
             camera(camera),
-            particles(particles) {}
+            simulation(sim),
+            srcPath(srcPath) {}
     ~glRenderer();
     int init();
     void onDraw();
@@ -84,16 +86,18 @@ private:
     void shadingPass(glm::mat4 projection, GLuint textureIn);
     void thicknessPass(glm::mat4 projection, GLuint FBO, GLuint textureOut);
     void setupQuad();
+    void updateBuffer();
     GLuint setupFBO(GLuint texture);
     GLuint setupTexture();
     Camera &camera;
-    std::vector<glm::vec3> &particles;
+    particleSystem &simulation;
     GLuint particleVAO, particleVBO, skyBoxVAO, skyBoxVBO, cubeMapTexture, quadVAO, quadVBO,
             firstFBO, secondFBO, thicknessTexture, textureOne, textureTwo;
     Shader depthShader, skyBoxShader, blurShader, shadingShader;
     int width, height;
     static const GLfloat skyBoxVertices[108];
     static const GLfloat quadVertices[18];
+    std::string srcPath;
 };
 
 

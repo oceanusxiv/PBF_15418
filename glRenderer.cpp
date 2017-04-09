@@ -86,6 +86,8 @@ void glRenderer::onDraw() {
 
     glm::mat4 projection = glm::perspective(camera.Zoom, (float)width/(float)height, 0.1f, 100.f);
 
+    updateBuffer();
+
     depthPass(projection, firstFBO, textureOne);
     blurPass(projection, secondFBO, textureOne, textureTwo, 0);
     blurPass(projection, firstFBO, textureTwo, textureOne, 1);
@@ -107,12 +109,12 @@ void glRenderer::setupSkyBox() {
     glBindVertexArray(0);
 
     std::vector<const GLchar*> faces;
-    faces.push_back("skybox/right.jpg");
-    faces.push_back("skybox/left.jpg");
-    faces.push_back("skybox/top.jpg");
-    faces.push_back("skybox/bottom.jpg");
-    faces.push_back("skybox/back.jpg");
-    faces.push_back("skybox/front.jpg");
+    faces.push_back((srcPath + "skybox/right.jpg").c_str());
+    faces.push_back((srcPath + "skybox/left.jpg").c_str());
+    faces.push_back((srcPath + "skybox/top.jpg").c_str());
+    faces.push_back((srcPath + "skybox/bottom.jpg").c_str());
+    faces.push_back((srcPath + "skybox/back.jpg").c_str());
+    faces.push_back((srcPath + "skybox/front.jpg").c_str());
     cubeMapTexture = loadCubeMap(faces);
 }
 
@@ -206,8 +208,8 @@ GLuint glRenderer::setupTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return texture;
@@ -217,7 +219,9 @@ void glRenderer::setupParticles() {
 
     glGenBuffers(1, &particleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    glBufferData(GL_ARRAY_BUFFER, particles.size() * sizeof(glm::vec3), &particles[0].x, GL_STATIC_DRAW);
+
+    std::vector<glm::vec3>& particles = simulation.getParticlePos();
+    glBufferData(GL_ARRAY_BUFFER, particles.size() * sizeof(glm::vec3), &particles[0].x, GL_STREAM_DRAW);
 
     glGenVertexArrays(1, &particleVAO);
     glBindVertexArray(particleVAO);
@@ -229,6 +233,14 @@ void glRenderer::setupParticles() {
     glBindVertexArray(0);
 }
 
+void glRenderer::updateBuffer() {
+
+    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
+    std::vector<glm::vec3>& particles = simulation.getParticlePos();
+    glBufferSubData(GL_ARRAY_BUFFER, 0, particles.size() * sizeof(glm::vec3), &particles[0].x);
+
+}
+
 void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) {
 
     depthShader.Use();
@@ -237,7 +249,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
     glm::mat4 model;
     glm::mat4 view = camera.GetViewMatrix();
 
-    GLfloat pointRadius = 0.04f;
+    GLfloat pointRadius = 0.4f;
     GLfloat pointScale = 1000.0f;
 
     // Pass the matrices to the shader
@@ -253,7 +265,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureOut, 0);
 
     glBindVertexArray(particleVAO);
-    glDrawArrays(GL_POINTS, 0, particles.size());
+    glDrawArrays(GL_POINTS, 0, simulation.getParticlePos().size());
     glBindVertexArray(0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
