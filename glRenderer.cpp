@@ -249,7 +249,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
     glm::mat4 model;
     glm::mat4 view = camera.GetViewMatrix();
 
-    GLfloat pointRadius = 0.4f;
+    GLfloat pointRadius = 2.0f;
     GLfloat pointScale = 1000.0f;
 
     // Pass the matrices to the shader

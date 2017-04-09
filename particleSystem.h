@@ -57,15 +57,15 @@ private:
 
     double poly6(glm::vec3 r);
     glm::vec3 spiky_prime(glm::vec3 r);
-    void apply_force();
+    void apply_forces();
     void find_neighbors();
     double calc_cell_density(size_t i, size_t j, size_t k, glm::vec3 grid_vertex);
     double calc_scalar(size_t i, size_t j, size_t k);
     void get_lambda();
-    glm::vec3 get_delta_pos(Particle &i);
-    void collision_check(Particle &i);
+    glm::vec3 get_delta_pos(Particle *i);
+    void collision_check(Particle *i);
     void apply_pressure();
-    glm::vec3 get_viscosity(Particle &i);
+    glm::vec3 get_viscosity(Particle *i);
 
 };
 

@@ -17,9 +17,9 @@ void main() {
     float depth = texture(renderedTexture, UV).x;
     vec2 screenSize = textureSize(renderedTexture, 0);
     vec3 eyePos = uvToEye(UV, depth);
-    float filterRadius = 1.0f/(length(eyePos)) * 300;
+    float filterRadius = 1.0f/(length(eyePos)) * 3000;
     vec2 blurDir;
-    float blurScale = 0.1f;
+    float blurScale = 0.08f;
     float blurDepthFalloff = 1.f;
 
     if (direction == 0) {

@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[]) {
 
-    int numParticles = 100000;
+    int numParticles = 2000;
     int width = 1280;
     int height = 720;
     std::string srcPath = "./";
