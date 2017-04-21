@@ -51,6 +51,7 @@ int glWindow::init() {
     glEnable(GL_DEPTH_CLAMP);
     glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_POINT_SPRITE);
 
     int w, h;
     glfwGetFramebufferSize(window, &w, &h);

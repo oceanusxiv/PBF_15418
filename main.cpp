@@ -1,15 +1,32 @@
 #include "glWindow.h"
 #include "glRenderer.h"
-#include "particleSystem.h"
 
-int main() {
+int main(int argc, char *argv[]) {
 
-    particleSystem sim(100000, glm::vec3(1, 1, 1));
+    int numParticles = 2000;
+    int width = 1280;
+    int height = 720;
+    std::string srcPath = "./";
 
-    glWindow simWindow(800, 600);
+    for (int i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--num")) {
+            numParticles = std::stoi(argv[i + 1]);
+        }
+        if (!strcmp(argv[i], "-r") || !strcmp(argv[i], "--resolution")) {
+            width = std::stoi(argv[i + 1]);
+            height = std::stoi(argv[i + 2]);
+        }
+        if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--path")) {
+            srcPath = argv[i + 1];
+        }
+    }
+
+    particleSystem sim(numParticles, glm::vec3(20, 20, 20));
+
+    glWindow simWindow(width, height);
     simWindow.init();
 
-    glRenderer simRenderer(800, 600, simWindow.getCamera(), sim.getParticles(), "shaders/");
+    glRenderer simRenderer(width, height, simWindow.getCamera(), sim, srcPath);
     simRenderer.init();
 
     while(!glfwWindowShouldClose(simWindow.getWindow()))
@@ -17,7 +34,7 @@ int main() {
         simWindow.updateTime();
         glfwPollEvents();
         simWindow.doMovement();
-
+        sim.step();
         simRenderer.onDraw();
 
         glfwSwapBuffers(simWindow.getWindow());

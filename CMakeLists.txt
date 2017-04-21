@@ -12,10 +12,9 @@ if(APPLE)
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
     MARK_AS_ADVANCED (COCOA_LIBRARY)
     SET(EXTRA_LIBS ${COCOA_LIBRARY})
-endif (APPLE)
-
-
+else(APPLE)
     include_directories(/afs/andrew.cmu.edu/usr8/efang/private/glm)
+endif (APPLE)
 
 
 include_directories(${GLFW_INCLUDE_DIRS})
@@ -27,7 +26,7 @@ include_directories(${OPENGL_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h particleSystem.cpp
-        particleSystem.h Camera.h SOIL2.h)
+        particleSystem.h Camera.h SOIL2.h Particle.h)
 
 add_executable(PBF_15418 ${SOURCE_FILES})
 
