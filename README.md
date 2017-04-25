@@ -11,6 +11,10 @@ This project aims to use CUDA to accelerate a position based fluid simulation sy
 
 A sequential version of the fluid simulation will be built first to serve as the baseline performance of the simulation. It is expected that the CUDA accelerated version would achieve larger than 10x speedup. For evaluation the simulation would be run on the Gates cluster computer and demonstrate real time (5+fps) simulation of more than 5k-10k fluid particles.
 
+# Checkpoint
+
+We have managed to get our single threaded implementation to run on the GHC machines. Additionally, we have fixed the build system to build with CUDA and demonstrated the ability to perform a test GPU computation in our program.
+
 # Dependencies
 
  * OpenGL
