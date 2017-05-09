@@ -24,7 +24,11 @@ public:
     virtual ~ParticleSystemSerial();
 
 private:
-
+    glm::vec3 particlePos[numParticles];
+    glm::vec3 particlePosNext[numParticles];
+    glm::vec3 particleVel[numParticles];
+    glm::vec3 particleDensity[numParticles];
+    glm::vec3 particleLambda[numParticles];
 };
 
 #endif //PBF_15418_PARTICLESYSTEMCUDA_H

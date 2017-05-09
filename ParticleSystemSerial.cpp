@@ -58,7 +58,7 @@ glm::vec3 ParticleSystemSerial::spiky_prime(glm::vec3 r) {
 void ParticleSystemSerial::apply_forces() {
 
     for (auto i : particles) {
-        i->v = dt*gravity;
+        i->v += dt*gravity;
         i->x_next = i->x + dt*i->v;
         i->boundary = false;
     }
@@ -74,10 +74,10 @@ void ParticleSystemSerial::find_neighbors() {
     for (auto p : particles) {
         p->neighbors.clear();
         glm::vec3 BB_min = p->x_next - glm::vec3(h, h, h);
-        glm::vec3 BB_max = p->x_next+glm::vec3(h, h, h)+glm::vec3(h, h, h);
-        for (double x=BB_min.x; x<BB_max.x; x+=h) {
-            for (double y=BB_min.y; y<BB_max.y; y+=h) {
-                for (double z=BB_min.z; z<BB_max.z; z+=h) {
+        glm::vec3 BB_max = p->x_next + glm::vec3(h, h, h);
+        for (double x=BB_min.x; x<=BB_max.x; x+=h) {
+            for (double y=BB_min.y; y<=BB_max.y; y+=h) {
+                for (double z=BB_min.z; z<=BB_max.z; z+=h) {
                     //std::cout << x<<y<<z<<std::endl;
                     auto range = neighborHash.equal_range(std::make_tuple(floor(x/h), floor(y/h), floor(z/h)));
                     if (range.first==range.second) { continue;}
@@ -173,32 +173,32 @@ void ParticleSystemSerial::collision_check(Particle *i) {
     if (i->x_next.x<bounds_min.x) {
         i->x_next.x = bounds_min.x+dist_from_bound;
         i->boundary=true;
-        i->v.x=-0.0001*i->v.x;
+        i->v.x=0;
     }
     if (i->x_next.x>bounds_max.x) {
         i->x_next.x = bounds_max.x-dist_from_bound;
         i->boundary=true;
-        i->v.x=-0.0001*i->v.x;
+        i->v.x=0;
     }
     if (i->x_next.y<bounds_min.y) {
         i->x_next.y = bounds_min.y+dist_from_bound;
         i->boundary=true;
-        i->v.y=-0.0001*i->v.y;
+        i->v.y=0;
     }
     if (i->x_next.y>bounds_max.y) {
         i->x_next.y = bounds_max.y-dist_from_bound;
         i->boundary=true;
-        i->v.y=-0.0001*i->v.y;
+        i->v.y=0;
     }
     if (i->x_next.z<bounds_min.z) {
         i->x_next.z = bounds_min.z+dist_from_bound;
         i->boundary=true;
-        i->v.z=-0.0001*i->v.z;
+        i->v.z=0;
     }
     if (i->x_next.z>bounds_max.z) {
         i->x_next.z = bounds_max.z-dist_from_bound;
         i->boundary=true;
-        i->v.z=-0.0001*i->v.z;
+        i->v.z=0;
     }
 }
 

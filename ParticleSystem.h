@@ -22,15 +22,15 @@ public:
 
 protected:
     ParticleSystem(unsigned numParticles, glm::vec3 bounds_max): numParticles(numParticles), bounds_max(bounds_max) {}
-    unsigned numParticles;
+    const unsigned numParticles;
     const size_t maxNeighbors = 50;
     const glm::vec3 gravity = glm::vec3(0.0, -9.8, 0.0);
     glm::vec3 bounds_min = glm::vec3(0.0, 0.0, 0.0);
     glm::vec3 bounds_max;
-    const int iterations = 5;
-    const double dt = 0.2;
+    const int iterations = 10;
+    const double dt = 0.05;
     const double h = 1.5;
-    const double rest_density = 2000;
+    const double rest_density = 1000;
     const double epsilon = 0.01;
     const double k = 0.1;
     const double delta_q = 0.2*h;
