@@ -25,14 +25,14 @@ include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIR})
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61)
-set(CUDA_LIBRARY saxpy)
-set(CUDA_SOURCES saxpy.cu)
-cuda_add_library(${CUDA_LIBRARY} ${CUDA_SOURCES})
+#set(CUDA_LIBRARY saxpy)
+#set(CUDA_SOURCES saxpy.cu)
+#cuda_add_library(${CUDA_LIBRARY} ${CUDA_SOURCES})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h particleSystem.cpp
-        particleSystem.h Camera.h SOIL2.h Particle.h)
+set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h ParticleSystemSerial.cpp
+        ParticleSystemSerial.h ParticleSystem.h Camera.h SOIL2.h Particle.h ParticleSystemCUDA.h)
 
 add_executable(PBF_15418 ${SOURCE_FILES})
 

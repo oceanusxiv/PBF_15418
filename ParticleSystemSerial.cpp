@@ -2,26 +2,11 @@
 // Created by Eric Fang on 2/7/17.
 //
 
-#include "particleSystem.h"
+#include "ParticleSystemSerial.h"
 #include <random>
 
-particleSystem::particleSystem(int numParticles, glm::vec3 bounds_max) :
-numParticles(numParticles),
-maxNeighbors(50),
-gravity(0.0, -9.8, 0),
-iterations(5),
-dt(0.2),
-h(1.5),
-rest_density(2000),
-epsilon(0.01),
-k(0.1),
-delta_q(0.2 * h),
-dist_from_bound(0.0001),
-c(0.01),
-poly6_const(315.f/(64.f*glm::pi<double>()*h*h*h*h*h*h*h*h*h)),
-spiky_const(45.f/(glm::pi<double>()*h*h*h*h*h*h)),
-bounds_min(0, 0, 0),
-bounds_max(bounds_max),
+ParticleSystemSerial::ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max) :
+ParticleSystem(numParticles, bounds_max),
 neighborHash(5, keyHash, keyEqual)
 {
     imax = size_t(ceil((bounds_max.x-bounds_min.x)/h));
@@ -43,7 +28,7 @@ neighborHash(5, keyHash, keyEqual)
     std::cout << particles.size() << " particles generated!" << std::endl;
 }
 
-particleSystem::~particleSystem() {
+ParticleSystemSerial::~ParticleSystemSerial() {
 
     for (auto i : particles) {
         delete(i);
@@ -51,18 +36,18 @@ particleSystem::~particleSystem() {
 
 }
 
-std::vector<glm::vec3>& particleSystem::getParticlePos() {
-    return particlePos;
+glm::vec3* ParticleSystemSerial::getParticlePos() {
+    return &particlePos[0];
 }
 
-double particleSystem::poly6(glm::vec3 r) {
+double ParticleSystemSerial::poly6(glm::vec3 r) {
     double norm_coeff = (h*h-glm::dot(r, r));
     if (norm_coeff<=0) {return 0.0;}
     if (r.x==0.0f && r.y==0.0f && r.z==0.0f) {return 0.0;}
     return poly6_const*norm_coeff*norm_coeff*norm_coeff;
 }
 
-glm::vec3 particleSystem::spiky_prime(glm::vec3 r) {
+glm::vec3 ParticleSystemSerial::spiky_prime(glm::vec3 r) {
     glm::vec3 r_norm = glm::normalize(r);
     double norm_coeff = (h-glm::l2Norm(r));
     if (norm_coeff<=0) {return glm::vec3(0.0f);}
@@ -70,7 +55,7 @@ glm::vec3 particleSystem::spiky_prime(glm::vec3 r) {
     return spiky_const*norm_coeff*norm_coeff*r_norm;
 }
 
-void particleSystem::apply_forces() {
+void ParticleSystemSerial::apply_forces() {
 
     for (auto i : particles) {
         i->v = dt*gravity;
@@ -80,7 +65,7 @@ void particleSystem::apply_forces() {
 
 }
 
-void particleSystem::find_neighbors() {
+void ParticleSystemSerial::find_neighbors() {
     neighborHash.clear();
     for (auto p : particles) {
         neighborHash.emplace(std::make_tuple(floor(p->x_next.x/h), floor(p->x_next.y/h), floor(p->x_next.z/h)), p);
@@ -109,7 +94,7 @@ void particleSystem::find_neighbors() {
     }
 }
 
-double particleSystem::calc_cell_density(size_t i, size_t j, size_t k, glm::vec3 grid_vertex) {
+double ParticleSystemSerial::calc_cell_density(size_t i, size_t j, size_t k, glm::vec3 grid_vertex) {
     double scalar=0.0f;
     auto range = neighborHash.equal_range(std::make_tuple(i,j,k));
     if (range.first==range.second) { return 0.0f;}
@@ -123,7 +108,7 @@ double particleSystem::calc_cell_density(size_t i, size_t j, size_t k, glm::vec3
     return scalar;
 }
 
-double particleSystem::calc_scalar(size_t i, size_t j, size_t k) {
+double ParticleSystemSerial::calc_scalar(size_t i, size_t j, size_t k) {
     double scalar=0.0f;
     glm::vec3 grid_vertex(i*h,j*h,k*h);
     scalar+=calc_cell_density(i,j,k,grid_vertex);
@@ -138,7 +123,7 @@ double particleSystem::calc_scalar(size_t i, size_t j, size_t k) {
     return scalar;
 }
 
-void particleSystem::get_lambda() {
+void ParticleSystemSerial::get_lambda() {
     for (auto i : particles) {
         //if (i->boundary) {continue;}
         double density_i = 0.0f;
@@ -168,7 +153,7 @@ void particleSystem::get_lambda() {
     }
 }
 
-glm::vec3 particleSystem::get_delta_pos(Particle *i) {
+glm::vec3 ParticleSystemSerial::get_delta_pos(Particle *i) {
     double w_dq = poly6(delta_q*glm::vec3(1.0f));
     //std::cout << w_dq << std::endl;
     glm::vec3 delta_pos(0.0f);
@@ -184,7 +169,7 @@ glm::vec3 particleSystem::get_delta_pos(Particle *i) {
     return (1.0f/rest_density)*delta_pos;
 }
 
-void particleSystem::collision_check(Particle *i) {
+void ParticleSystemSerial::collision_check(Particle *i) {
     if (i->x_next.x<bounds_min.x) {
         i->x_next.x = bounds_min.x+dist_from_bound;
         i->boundary=true;
@@ -217,7 +202,7 @@ void particleSystem::collision_check(Particle *i) {
     }
 }
 
-void particleSystem::apply_pressure() {
+void ParticleSystemSerial::apply_pressure() {
     for (auto i : particles) {
         glm::vec3 dp = get_delta_pos(i);
         i->x_next+=dp;
@@ -225,7 +210,7 @@ void particleSystem::apply_pressure() {
     }
 }
 
-glm::vec3 particleSystem::get_viscosity(Particle *i) {
+glm::vec3 ParticleSystemSerial::get_viscosity(Particle *i) {
     glm::vec3 visc = glm::vec3(0.0f);
     for (auto j : i->neighbors) {
         visc+=(i->v-j->v)*poly6(i->x-j->x);
@@ -233,7 +218,7 @@ glm::vec3 particleSystem::get_viscosity(Particle *i) {
     return c*visc;
 }
 
-void particleSystem::step() {
+void ParticleSystemSerial::step() {
 
     apply_forces();
 

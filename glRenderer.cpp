@@ -220,8 +220,8 @@ void glRenderer::setupParticles() {
     glGenBuffers(1, &particleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
 
-    std::vector<glm::vec3>& particles = simulation.getParticlePos();
-    glBufferData(GL_ARRAY_BUFFER, particles.size() * sizeof(glm::vec3), &particles[0].x, GL_STREAM_DRAW);
+    glm::vec3* particles = simulation.getParticlePos();
+    glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(glm::vec3), particles, GL_STREAM_DRAW);
 
     glGenVertexArrays(1, &particleVAO);
     glBindVertexArray(particleVAO);
@@ -236,8 +236,8 @@ void glRenderer::setupParticles() {
 void glRenderer::updateBuffer() {
 
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    std::vector<glm::vec3>& particles = simulation.getParticlePos();
-    glBufferSubData(GL_ARRAY_BUFFER, 0, particles.size() * sizeof(glm::vec3), &particles[0].x);
+    glm::vec3* particles = simulation.getParticlePos();
+    glBufferSubData(GL_ARRAY_BUFFER, 0, simulation.getParticleNum() * sizeof(glm::vec3), particles);
 
 }
 
@@ -265,7 +265,7 @@ void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureOut, 0);
 
     glBindVertexArray(particleVAO);
-    glDrawArrays(GL_POINTS, 0, simulation.getParticlePos().size());
+    glDrawArrays(GL_POINTS, 0, simulation.getParticleNum());
     glBindVertexArray(0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

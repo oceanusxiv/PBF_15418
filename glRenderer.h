@@ -12,13 +12,13 @@
 #include <vector>
 #include "shader.h"
 #include "Camera.h"
-#include "particleSystem.h"
+#include "ParticleSystemSerial.h"
 
 
 class glRenderer {
 
 public:
-    glRenderer(int width, int height, Camera& camera, particleSystem &sim, std::string srcPath) :
+    glRenderer(int width, int height, Camera& camera, ParticleSystemSerial &sim, std::string srcPath) :
             depthShader(srcPath + "shaders/depth_vs.glsl", srcPath + "shaders/depth_fs.glsl"),
             skyBoxShader(srcPath + "shaders/skybox_vs.glsl", srcPath + "shaders/skybox_fs.glsl"),
             blurShader(srcPath + "shaders/texture_vs.glsl", srcPath + "shaders/blur_fs.glsl"),
@@ -90,7 +90,7 @@ private:
     GLuint setupFBO(GLuint texture);
     GLuint setupTexture();
     Camera &camera;
-    particleSystem &simulation;
+    ParticleSystemSerial &simulation;
     GLuint particleVAO, particleVBO, skyBoxVAO, skyBoxVBO, cubeMapTexture, quadVAO, quadVBO,
             firstFBO, secondFBO, thicknessTexture, textureOne, textureTwo;
     Shader depthShader, skyBoxShader, blurShader, shadingShader;
