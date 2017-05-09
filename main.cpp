@@ -6,8 +6,8 @@ void printCudaInfo();
 int main(int argc, char *argv[]) {
 
     int numParticles = 2000;
-    int width = 1280;
-    int height = 720;
+    int width = 640;
+    int height = 480;
     std::string srcPath = "./";
 
     for (int i = 1; i < argc; i++) {
@@ -31,9 +31,19 @@ int main(int argc, char *argv[]) {
     glRenderer simRenderer(width, height, simWindow.getCamera(), sim, srcPath);
     simRenderer.init();
 
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
 
     while(!glfwWindowShouldClose(simWindow.getWindow()))
     {
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
+            std::cout << 1000.0/double(nbFrames) << " ms/frame" << std::endl;
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
+
         simWindow.updateTime();
         glfwPollEvents();
         simWindow.doMovement();

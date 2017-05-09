@@ -17,14 +17,14 @@
 class ParticleSystemCUDA : public ParticleSystem {
 
 public:
-    ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max));
+    ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max);
     glm::vec3* getParticlePos();
     void step();
     unsigned getParticleNum() { return numParticles; };
     virtual ~ParticleSystemSerial();
 
 private:
-    
+
 };
 
 #endif //PBF_15418_PARTICLESYSTEMCUDA_H
