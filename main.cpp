@@ -2,6 +2,7 @@
 #include "glRenderer.h"
 
 void saxpyCuda(int N, float alpha, float* x, float* y, float* result);
+void printCudaInfo();
 
 int main(int argc, char *argv[]) {
     int N = 20 * 1000;
@@ -16,16 +17,19 @@ int main(int argc, char *argv[]) {
         resultarray[i] = 0.f;
     }
 
+    printCudaInfo();
     std::cout << "STARTING SAXPY\n";
     saxpyCuda(N, alpha, xarray, yarray, resultarray);
     std::cout << "DONE SAXPY\n";
-    for (int i = 0; i < 10; i++) {
-      std::cout << resultarray[i] << std::endl;
-    }
-
+//    for (int i = 0; i < 10; i++) {
+//      std::cout << resultarray[i] << std::endl;
+//    }
+//
     delete [] xarray;
     delete [] yarray;
     delete [] resultarray;
+
+    return 0;
 
     int numParticles = 2000;
     int width = 1280;
