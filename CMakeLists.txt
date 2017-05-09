@@ -9,6 +9,8 @@ find_package(CUDA REQUIRED)
 
 pkg_search_module(GLFW REQUIRED glfw3)
 
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
 if(APPLE)
     INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
     FIND_LIBRARY(COCOA_LIBRARY Cocoa)
