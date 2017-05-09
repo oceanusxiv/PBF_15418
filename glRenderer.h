@@ -54,7 +54,7 @@ private:
         SOIL_free_image_data(image);
         return textureID;
     }
-    static inline GLuint loadCubeMap(std::vector<const GLchar *> faces)
+    static inline GLuint loadCubeMap(std::vector<std::string> faces)
     {
         GLuint textureID;
         glGenTextures(1, &textureID);
@@ -65,7 +65,7 @@ private:
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
         for(GLuint i = 0; i < faces.size(); i++)
         {
-            image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+            image = SOIL_load_image(faces[i].c_str(), &width, &height, 0, SOIL_LOAD_RGB);
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
             SOIL_free_image_data(image);
         }

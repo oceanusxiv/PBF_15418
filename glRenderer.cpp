@@ -108,13 +108,13 @@ void glRenderer::setupSkyBox() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    std::vector<const GLchar*> faces;
-    faces.push_back((srcPath + "skybox/right.jpg").c_str());
-    faces.push_back((srcPath + "skybox/left.jpg").c_str());
-    faces.push_back((srcPath + "skybox/top.jpg").c_str());
-    faces.push_back((srcPath + "skybox/bottom.jpg").c_str());
-    faces.push_back((srcPath + "skybox/back.jpg").c_str());
-    faces.push_back((srcPath + "skybox/front.jpg").c_str());
+    std::vector<std::string> faces;
+    faces.push_back((srcPath + "skybox/right.jpg"));
+    faces.push_back((srcPath + "skybox/left.jpg"));
+    faces.push_back((srcPath + "skybox/top.jpg"));
+    faces.push_back((srcPath + "skybox/bottom.jpg"));
+    faces.push_back((srcPath + "skybox/back.jpg"));
+    faces.push_back((srcPath + "skybox/front.jpg"));
     cubeMapTexture = loadCubeMap(faces);
 }
 
