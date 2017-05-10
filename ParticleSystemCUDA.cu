@@ -49,8 +49,12 @@ inline __device__ float3 normalize(float3 a) {
 
 /** Helper methods **/
 
+inline __device__ float3 make_vector(float x) {
+  return make_float3(x, x, x);
+}
+
 __device__ float poly6(float3 r) {
-  float norm_coeff = h * h - r * r;
+  float norm_coeff = params.h * params.h - r * r;
   if (norm_coeff <= 0) {
     return 0.0f;
   }
@@ -64,7 +68,7 @@ __device__ float poly6(float3 r) {
 
 __device__ float3 spiky_prime(float3 r) {
   float3 r_norm = normalize(r);
-  float norm_coeff = h - length(r);
+  float norm_coeff = params.h - length(r);
   if (norm_coeff <= 0) {
     return make_vector(0.0f);
   }
@@ -76,13 +80,9 @@ __device__ float3 spiky_prime(float3 r) {
   return params.spiky_const * norm_coeff * norm_coeff * r_norm;
 }
 
-inline __device__ float3 make_vector(float x) {
-  return make_float3(x, x, x);
-}
-
 inline __device__ int pos_to_cell_idx(float3 pos) {
 //TODO
-  return (((int)floorf(pos.x / h)) * h * h + ((int)floorf(pos.y / h)) * h + ((int)floorf(pos.z / h)));
+  return (((int)floorf(pos.x / params.h)) * params.gridX * params.gridY  + ((int)floorf(pos.y / params.h)) * params.gridY + ((int)floorf(pos.z / params.h)));
 }
 
 /** End of helpers **/
@@ -91,9 +91,9 @@ __global__ void apply_forces(float3 *velocity, float3 *position_next, float3 *po
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
-  float3 v = dt * gravity;
+  float3 v = params.dt * params.gravity;
   velocity[particle_index] = v;
-  position_next[particle_index] = position[particle_index] + dt * v;
+  position_next[particle_index] = position[particle_index] + params.dt * v;
 }
 
 __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid) {
@@ -104,7 +104,7 @@ __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int
   for (int x = -1; x <= 1; x++) {
     for (int y = -1; y <= 1; y++) {
       for (int z = -1; z <= 1; z++) {
-        int cell_index = pos_to_cell_idx(make_float3(p.x + x * h, p.y + y * h, p.z + z * h));
+        int cell_index = pos_to_cell_idx(make_float3(p.x + x * params.h, p.y + y * params.h, p.z + z * params.h));
         if (cell_index < 0) continue;
 
         int particles_in_grid = min(grid_counts[cell_index], params.maxGridCount);
@@ -112,7 +112,7 @@ __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int
           int candidate_index = grid[cell_index * params.maxGridCount + i];
           float3 n = position_next[candidate_index];
 
-          if (n != p && l2Norm(p, n) < h && neighbor_counts[particle_index] < params.maxNeighbors) {
+          if (n != p && l2Norm(p, n) < params.h && neighbor_counts[particle_index] < params.maxNeighbors) {
             int count = neighbor_counts[particle_index]++;
             neighbors[particle_index * params.maxNeighbors + count] = candidate_index;
           }
@@ -185,10 +185,10 @@ __device__ float3 get_delta_pos(int particle_index, int *neighbor_counts, int *n
     }
 
     float scorr = -params.k * (kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio);
-    delta_pos += (lambda[particle_index] + lambda[neighbor_index] + scorr) * spiky_prime(d);
+    delta_pos = delta_pos + (lambda[particle_index] + lambda[neighbor_index] + scorr) * spiky_prime(d);
   }
 
-  return (1.0f / rest_density) * delta_pos;
+  return (1.0f / params.rest_density) * delta_pos;
 }
 
 __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *position_next, float *density, float *lambda) {
@@ -205,9 +205,9 @@ __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *positio
     float3 v = position_next[particle_index] - position_next[neighbor_index];
     density_i += poly6(v);
 
-    float3 sp = spiky_prime(v)
+    float3 sp = spiky_prime(v);
     ci_gradient += length2(-1.0f / params.rest_density * sp);
-    accum += sp;
+    accum = accum + sp;
   }
 
   density[particle_index] = density_i;
@@ -220,7 +220,7 @@ __global__ void apply_pressure(int *neighbor_counts, int *neighbors, float3 *pos
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
-  position_next[particle_index] += get_delta_pos(particle_index, neighbor_counts, neighbors, position_next, lambda);
+  position_next[particle_index] = position_next[particle_index] + get_delta_pos(particle_index, neighbor_counts, neighbors, position_next, lambda);
 }
 
 __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *position_next, int *neighbor_counts, int *neighbors) {
@@ -233,15 +233,15 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
   int neighbor_count = neighbor_counts[particle_index];
   for (int i = 0; i < neighbor_count; i++) {
     int neighbor_index = neighbors[particle_index * params.maxNeighbors + i];
-    viscosity += poly6(position[particle_index] - position[neighbor_index]) * (velocity[particle_index] - velocity[neighbor_index]);
+    viscosity = viscosity + poly6(position[particle_index] - position[neighbor_index]) * (velocity[particle_index] - velocity[neighbor_index]);
   }
 
   velocity[particle_index] = (1.0f / params.dt) * (position_next[particle_index] - position[particle_index]) + params.c * viscosity;
   position[particle_index] = position_next[particle_index];
 }
 
-step(float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts,
-     int *neighbors, float *density, float *lambda) {
+void update(float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts,
+     int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
   int blocks = (params.particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
@@ -253,7 +253,7 @@ step(float3 *velocity, float3 *position_next, float3 *position, int *neighbor_co
 
   for (int iter = 0; iter < params.iterations; iter++) {
     get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, density, lambda);
-    apply_pressure<<<blocks, NUM_THREADS>>>();
+    apply_pressure<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
     collision_check<<<blocks, NUM_THREADS>>>(position_next, velocity);
   }
 

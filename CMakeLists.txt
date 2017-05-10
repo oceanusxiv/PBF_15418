@@ -17,7 +17,7 @@ if(APPLE)
     MARK_AS_ADVANCED (COCOA_LIBRARY)
     SET(EXTRA_LIBS ${COCOA_LIBRARY})
 else(APPLE)
-    include_directories(/afs/andrew.cmu.edu/usr8/efang/private/glm/)
+    include_directories(/afs/andrew.cmu.edu/usr8/efang/public/glm/)
 endif (APPLE)
 
 include_directories(${GLFW_INCLUDE_DIRS})
