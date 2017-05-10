@@ -170,7 +170,7 @@ __device__ float3 get_delta_pos(int particle_index, int *neighbor_counts, int *n
 
   int neighbor_count = neighbor_counts[particle_index];
   for (int i = 0; i < neighbor_count; i++) {
-    int neighbor_index = neighbors[i];
+    int neighbor_index = neighbors[particle_index * params.maxNeighbors + i];
     float3 d = position_next[particle_index] - position_next[neighbor_index];
 
     float kernel_ratio = poly6(d) / w_dq;
@@ -223,7 +223,7 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
 
   int neighbor_count = neighbor_counts[particle_index];
   for (int i = 0; i < neighbor_count; i++) {
-    int neighbor_index = neighbors[i];
+    int neighbor_index = neighbors[particle_index * params.maxNeighbors + i];
     viscosity += poly6(position[particle_index] - position[neighbor_index]) * (velocity[particle_index] - velocity[neighbor_index]);
   }
 
