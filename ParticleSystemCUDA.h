@@ -13,7 +13,28 @@
 #include <iostream>
 #include <unordered_map>
 #include "ParticleSystem.h"
-#include "cuda_runtime.h"
+#include <cuda_runtime.h>
+
+struct systemParams {
+    float poly6_const;
+    float spiky_const;
+    int maxGridCount;
+    int maxNeighbors;
+    int particleCount;
+    float3 bounds_min;
+    float dist_from_bound;
+    float3 bounds_max;
+    float delta_q;
+    float k;
+    float rest_density;
+    float epsilon;
+    float dt;
+    float c;
+    int iterations;
+    int gridX;
+    int gridY;
+    int gridZ;
+};
 
 class ParticleSystemCUDA : public ParticleSystem {
 
@@ -34,6 +55,13 @@ private:
     int* neighbors;
     int* gridCount;
     int* grid;
+    inline void cudaCheck(cudaError_t x) {
+        cudaError_t err = x;
+        if (err != cudaSuccess) {
+            std::cout << cudaGetErrorString(err) << std::endl;
+            assert(0);
+        }
+    }
 };
 
 #endif //PBF_15418_PARTICLESYSTEMCUDA_H
