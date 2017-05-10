@@ -35,6 +35,7 @@ struct systemParams {
     int gridX;
     int gridY;
     int gridZ;
+    int h;
 };
 
 class ParticleSystemCUDA : public ParticleSystem {
@@ -52,6 +53,7 @@ private:
     float3* particleVel;
     float3* particleDensity;
     float3* particleLambda;
+    float2* hostParticlePos;
     int* neighborCounts;
     int* neighbors;
     int* gridCount;
