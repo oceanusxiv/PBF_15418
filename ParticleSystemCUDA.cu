@@ -81,13 +81,16 @@ inline __device__ float3 make_vector(float x) {
 }
 
 inline __device__ int pos_to_cell_idx(float3 pos) {
-  return (floor(pos.x / h) * h * h + floor(pos.y / h) * h + floor(pos.z / h));
+//TODO
+  return (((int)floorf(pos.x / h)) * h * h + ((int)floorf(pos.y / h)) * h + ((int)floorf(pos.z / h)));
 }
 
 /** End of helpers **/
 
 __global__ void apply_forces(float3 *velocity, float3 *position_next, float3 *position) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
+
   float3 v = dt * gravity;
   velocity[particle_index] = v;
   position_next[particle_index] = position[particle_index] + dt * v;
@@ -95,21 +98,21 @@ __global__ void apply_forces(float3 *velocity, float3 *position_next, float3 *po
 
 __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
 
   float3 p = position_next[particle_index];
   for (int x = -1; x <= 1; x++) {
     for (int y = -1; y <= 1; y++) {
       for (int z = -1; z <= 1; z++) {
         int cell_index = pos_to_cell_idx(make_float3(p.x + x * h, p.y + y * h, p.z + z * h));
+        if (cell_index < 0) continue;
 
-        // TODO: Check not out of bounds
-        int particles_in_grid = grid_counts[cell_index];
+        int particles_in_grid = min(grid_counts[cell_index], params.maxGridCount);
         for (int i = 0; i < particles_in_grid; i++) {
           int candidate_index = grid[cell_index * params.maxGridCount + i];
           float3 n = position_next[candidate_index];
 
-          // TODO: Check we haven't added too many
-          if (n != p && l2Norm(p, n) < h) {
+          if (n != p && l2Norm(p, n) < h && neighbor_counts[particle_index] < params.maxNeighbors) {
             int count = neighbor_counts[particle_index]++;
             neighbors[particle_index * params.maxNeighbors + count] = candidate_index;
           }
@@ -121,10 +124,12 @@ __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int
 
 __global__ void grid_kernel(int *grid_counts, int *grid) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
 
   int idx = atomicAdd(&grid_counts[particle_index], 1);
-  //TODO Bounds
-  grid[particle_index * params.maxGridCount + idx] = particle_index;
+  if (idx < params.maxGridCount) {
+    grid[particle_index * params.maxGridCount + idx] = particle_index;
+  }
 }
 
 void find_neighbors(int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
@@ -136,6 +141,7 @@ void find_neighbors(int *grid_counts, int *grid, int *neighbor_counts, int *neig
 
 __global__ void collision_check(float3 *position_next, float3 *velocity) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
 
   float3 n = position_next[particle_index];
   if (n.x < params.bounds_min.x) {
@@ -187,6 +193,7 @@ __device__ float3 get_delta_pos(int particle_index, int *neighbor_counts, int *n
 
 __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *position_next, float *density, float *lambda) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
 
   float density_i = 0.0f;
   float ci_gradient = 0.0f;
@@ -211,12 +218,14 @@ __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *positio
 
 __global__ void apply_pressure(int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
 
   position_next[particle_index] += get_delta_pos(particle_index, neighbor_counts, neighbors, position_next, lambda);
 }
 
 __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *position_next, int *neighbor_counts, int *neighbors) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
 
   // Get the viscosity
   float3 viscosity = make_vector(0.0f);
