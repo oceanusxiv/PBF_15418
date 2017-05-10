@@ -32,7 +32,7 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -genc
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h ParticleSystemSerial.cpp
-        ParticleSystemSerial.h ParticleSystem.h Camera.h SOIL2.h Particle.h ParticleSystemCUDA.h)
+        ParticleSystemSerial.h ParticleSystem.h Camera.h SOIL2.h Particle.h ParticleSystemCUDA.h ParticleSystemCUDA.cpp)
 
 add_executable(PBF_15418 ${SOURCE_FILES})
 
