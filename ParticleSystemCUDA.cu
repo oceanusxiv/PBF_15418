@@ -33,7 +33,7 @@ inline __device__ float length2(float3 a) {
 }
 
 inline __device__ float length(float3 a) {
-  return sqrtf(length2(a));
+  return sqrt(length2(a));
 }
 
 inline __device__ float l2Norm(float3 a, float3 b) {
@@ -240,18 +240,18 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
   position[particle_index] = position_next[particle_index];
 }
 
-void update(float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts,
+void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts,
      int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
-  int blocks = (params.particleCount + NUM_THREADS - 1) / NUM_THREADS;
+  int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
 
   // Clear num_neighbors
-  cudaMemset(neighbor_counts, 0, sizeof(int) * params.particleCount);
-  cudaMemset(grid_counts, 0, sizeof(int) * params.particleCount);
+  cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
+  cudaMemset(grid_counts, 0, sizeof(int) * particleCount);
   find_neighbors(grid_counts, grid, neighbor_counts, neighbors, position_next);
 
-  for (int iter = 0; iter < params.iterations; iter++) {
+  for (int iter = 0; iter < iterations; iter++) {
     get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, density, lambda);
     apply_pressure<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
     collision_check<<<blocks, NUM_THREADS>>>(position_next, velocity);
