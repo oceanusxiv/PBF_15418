@@ -1,6 +1,7 @@
 #include "ParticleSystemCUDA.h"
 
 #define EPSILON 0.0000000001f
+#define NUM_THREADS 256
 __constant__ systemParams params;
 
 /**
@@ -127,10 +128,10 @@ __global__ void grid_kernel(int *grid_counts, int *grid) {
 }
 
 void find_neighbors(int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
-  int blocks = (params.particleCount + params.numThreads - 1) / params.numThreads;
+  int blocks = (params.particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
-  grid_kernel<<<blocks, params.numThreads>>>(grid_counts, grid);
-  neighbor_kernel<<<blocks, params.numThreads>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
+  grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid);
+  neighbor_kernel<<<blocks, NUM_THREADS>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
 }
 
 __global__ void collision_check(float3 *position_next, float3 *velocity) {
@@ -232,9 +233,9 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
 
 step(float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts,
      int *neighbors, float *density, float *lambda) {
-  int blocks = (params.particleCount + params.numThreads - 1) / params.numThreads;
+  int blocks = (params.particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
-  apply_forces<<<blocks, params.numThreads>>>(velocity, position_next, position);
+  apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
 
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * params.particleCount);
@@ -242,10 +243,10 @@ step(float3 *velocity, float3 *position_next, float3 *position, int *neighbor_co
   find_neighbors(grid_counts, grid, neighbor_counts, neighbors, position_next);
 
   for (int iter = 0; iter < params.iterations; iter++) {
-    get_lambda<<<blocks, params.numThreads>>>(neighbor_counts, neighbors, position_next, density, lambda);
-    apply_pressure<<<blocks, params.numThreads>>>();
-    collision_check<<<blocks, params.numThreads>>>(position_next, velocity);
+    get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, density, lambda);
+    apply_pressure<<<blocks, NUM_THREADS>>>();
+    collision_check<<<blocks, NUM_THREADS>>>(position_next, velocity);
   }
 
-  apply_viscosity<<<blocks, params.numThreads>>>(velocity, position, position_next, neighbor_counts, neighbors);
+  apply_viscosity<<<blocks, NUM_THREADS>>>(velocity, position, position_next, neighbor_counts, neighbors);
 }
