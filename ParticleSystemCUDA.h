@@ -53,7 +53,7 @@ private:
     float3* particleVel;
     float3* particleDensity;
     float3* particleLambda;
-    float2* hostParticlePos;
+    float3* hostParticlePos;
     int* neighborCounts;
     int* neighbors;
     int* gridCount;

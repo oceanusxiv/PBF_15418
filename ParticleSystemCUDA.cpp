@@ -84,6 +84,6 @@ float* ParticleSystemCUDA::getParticlePos() {
 }
 
 void ParticleSystemCUDA::step() {
-    update(particleVel, particlePosNext, particlePos, neighborCounts, neighbors, gridCount, grid, particleDensity, particleLambda);
+    update(numParticles, iterations, particleVel, particlePosNext, particlePos, neighborCounts, neighbors, gridCount, grid, particleDensity, particleLambda);
 }
 
