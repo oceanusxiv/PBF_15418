@@ -29,6 +29,7 @@ struct systemParams {
     float rest_density;
     float epsilon;
     float dt;
+    float3 gravity;
     float c;
     int iterations;
     int gridX;
