@@ -1,0 +1,101 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+apply_forces	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::apply_forces() {$/;"	f	language:C++	class:ParticleSystemSerial
+apply_forces	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void apply_forces();$/;"	p	language:C++	class:ParticleSystemSerial
+apply_pressure	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::apply_pressure() {$/;"	f	language:C++	class:ParticleSystemSerial
+apply_pressure	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void apply_pressure();$/;"	p	language:C++	class:ParticleSystemSerial
+blurPass	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::blurPass(glm::mat4 projection, GLuint FBO, GLuint textureIn, GLuint textureOut, int direction) {$/;"	f	language:C++	class:glRenderer
+bounds_max	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    glm::vec3 bounds_max;$/;"	m	language:C++	class:ParticleSystem
+bounds_min	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    glm::vec3 bounds_min = glm::vec3(0.0, 0.0, 0.0);$/;"	m	language:C++	class:ParticleSystem
+c	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double c = 0.01;$/;"	m	language:C++	class:ParticleSystem
+calc_cell_density	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^double ParticleSystemSerial::calc_cell_density(size_t i, size_t j, size_t k, glm::vec3 grid_vertex) {$/;"	f	language:C++	class:ParticleSystemSerial
+calc_cell_density	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    double calc_cell_density(size_t i, size_t j, size_t k, glm::vec3 grid_vertex);$/;"	p	language:C++	class:ParticleSystemSerial
+calc_scalar	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^double ParticleSystemSerial::calc_scalar(size_t i, size_t j, size_t k) {$/;"	f	language:C++	class:ParticleSystemSerial
+calc_scalar	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    double calc_scalar(size_t i, size_t j, size_t k);$/;"	p	language:C++	class:ParticleSystemSerial
+collision_check	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::collision_check(Particle *i) {$/;"	f	language:C++	class:ParticleSystemSerial
+collision_check	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void collision_check(Particle *i);$/;"	p	language:C++	class:ParticleSystemSerial
+delta_q	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double delta_q = 0.2*h;$/;"	m	language:C++	class:ParticleSystem
+depthPass	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) {$/;"	f	language:C++	class:glRenderer
+dist_from_bound	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double dist_from_bound = 0.0001;$/;"	m	language:C++	class:ParticleSystem
+drawSkyBox	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::drawSkyBox(glm::mat4 projection) {$/;"	f	language:C++	class:glRenderer
+dt	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double dt = 0.05;$/;"	m	language:C++	class:ParticleSystem
+epsilon	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double epsilon = 0.01;$/;"	m	language:C++	class:ParticleSystem
+find_neighbors	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::find_neighbors() {$/;"	f	language:C++	class:ParticleSystemSerial
+find_neighbors	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void find_neighbors();$/;"	p	language:C++	class:ParticleSystemSerial
+getParticleNum	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    virtual unsigned getParticleNum() = 0;$/;"	p	language:C++	class:ParticleSystem
+getParticleNum	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    unsigned getParticleNum() { return numParticles; }$/;"	f	language:C++	class:ParticleSystemCUDA
+getParticleNum	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    unsigned getParticleNum() { return numParticles; };$/;"	f	language:C++	class:ParticleSystemSerial
+getParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    virtual float* getParticlePos() = 0;$/;"	p	language:C++	class:ParticleSystem
+getParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^float* ParticleSystemCUDA::getParticlePos() {$/;"	f	language:C++	class:ParticleSystemCUDA
+getParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float* getParticlePos();$/;"	p	language:C++	class:ParticleSystemCUDA
+getParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^float* ParticleSystemSerial::getParticlePos() {$/;"	f	language:C++	class:ParticleSystemSerial
+getParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    float* getParticlePos();$/;"	p	language:C++	class:ParticleSystemSerial
+get_delta_pos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^glm::vec3 ParticleSystemSerial::get_delta_pos(Particle *i) {$/;"	f	language:C++	class:ParticleSystemSerial
+get_delta_pos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    glm::vec3 get_delta_pos(Particle *i);$/;"	p	language:C++	class:ParticleSystemSerial
+get_lambda	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::get_lambda() {$/;"	f	language:C++	class:ParticleSystemSerial
+get_lambda	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void get_lambda();$/;"	p	language:C++	class:ParticleSystemSerial
+get_viscosity	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^glm::vec3 ParticleSystemSerial::get_viscosity(Particle *i) {$/;"	f	language:C++	class:ParticleSystemSerial
+get_viscosity	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    glm::vec3 get_viscosity(Particle *i);$/;"	p	language:C++	class:ParticleSystemSerial
+gravity	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const glm::vec3 gravity = glm::vec3(0.0, -9.8, 0.0);$/;"	m	language:C++	class:ParticleSystem
+grid	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int* grid;$/;"	m	language:C++	class:ParticleSystemCUDA
+gridCount	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int* gridCount;$/;"	m	language:C++	class:ParticleSystemCUDA
+h	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double h = 1.5;$/;"	m	language:C++	class:ParticleSystem
+hashMap	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^typedef std::unordered_multimap<std::tuple<size_t, size_t, size_t>, Particle *, decltype(keyHash), decltype(keyEqual)> hashMap;$/;"	t	language:C++
+imax	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    size_t imax,jmax,kmax;$/;"	m	language:C++	class:ParticleSystemSerial
+init	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^int glRenderer::init() {$/;"	f	language:C++	class:glRenderer
+iterations	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const int iterations = 10;$/;"	m	language:C++	class:ParticleSystem
+jmax	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    size_t imax,jmax,kmax;$/;"	m	language:C++	class:ParticleSystemSerial
+k	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double k = 0.1;$/;"	m	language:C++	class:ParticleSystem
+keyEqual	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^auto keyEqual = [](const std::tuple<size_t,size_t,size_t>& lhs, const std::tuple<size_t,size_t,size_t>& rhs) -> bool {$/;"	v	language:C++
+keyHash	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^auto keyHash = [](const std::tuple<size_t,size_t,size_t>& k) -> size_t {$/;"	v	language:C++
+kmax	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    size_t imax,jmax,kmax;$/;"	m	language:C++	class:ParticleSystemSerial
+maxNeighbors	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const size_t maxNeighbors = 50;$/;"	m	language:C++	class:ParticleSystem
+neighborCounts	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int* neighborCounts;$/;"	m	language:C++	class:ParticleSystemCUDA
+neighborHash	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    hashMap neighborHash;$/;"	m	language:C++	class:ParticleSystemSerial
+neighbors	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int* neighbors;$/;"	m	language:C++	class:ParticleSystemCUDA
+numParticles	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const unsigned numParticles;$/;"	m	language:C++	class:ParticleSystem
+onDraw	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::onDraw() {$/;"	f	language:C++	class:glRenderer
+particleDensity	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3* particleDensity;$/;"	m	language:C++	class:ParticleSystemCUDA
+particleLambda	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3* particleLambda;$/;"	m	language:C++	class:ParticleSystemCUDA
+particlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3* particlePos;$/;"	m	language:C++	class:ParticleSystemCUDA
+particlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    std::vector<glm::vec3> particlePos;$/;"	m	language:C++	class:ParticleSystemSerial
+particlePosNext	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3* particlePosNext;$/;"	m	language:C++	class:ParticleSystemCUDA
+particles	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    std::vector<Particle *> particles;$/;"	m	language:C++	class:ParticleSystemSerial
+ParticleSystem	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    ParticleSystem(unsigned numParticles, glm::vec3 bounds_max): numParticles(numParticles), bounds_max(bounds_max) {}$/;"	f	language:C++	class:ParticleSystem
+ParticleSystem	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^class ParticleSystem {$/;"	c	language:C++
+ParticleSystemCUDA	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^ParticleSystemCUDA::ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max) :$/;"	f	language:C++	class:ParticleSystemCUDA
+ParticleSystemCUDA	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max);$/;"	p	language:C++	class:ParticleSystemCUDA
+ParticleSystemCUDA	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^class ParticleSystemCUDA : public ParticleSystem {$/;"	c	language:C++
+ParticleSystemSerial	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^ParticleSystemSerial::ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max) :$/;"	f	language:C++	class:ParticleSystemSerial
+ParticleSystemSerial	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max);$/;"	p	language:C++	class:ParticleSystemSerial
+ParticleSystemSerial	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^class ParticleSystemSerial : public ParticleSystem {$/;"	c	language:C++
+particleVel	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3* particleVel;$/;"	m	language:C++	class:ParticleSystemCUDA
+PBF_15418_PARTICLESYSTEMCUDA_H	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	6;"	d	language:C++
+PBF_15418_PARTICLESYSTEMSERIAL_H	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	6;"	d	language:C++
+PBF_15418_PARTICLESYSTEM_H	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	6;"	d	language:C++
+poly6	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^double ParticleSystemSerial::poly6(glm::vec3 r) {$/;"	f	language:C++	class:ParticleSystemSerial
+poly6	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    double poly6(glm::vec3 r);$/;"	p	language:C++	class:ParticleSystemSerial
+poly6_const	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double poly6_const = 315.f\/(64.f*glm::pi<double>()*h*h*h*h*h*h*h*h*h);$/;"	m	language:C++	class:ParticleSystem
+quadVertices	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^const GLfloat glRenderer::quadVertices[18] = {$/;"	m	language:C++	class:glRenderer	file:
+rest_density	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double rest_density = 1000;$/;"	m	language:C++	class:ParticleSystem
+scalar_field	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    std::vector<double> scalar_field;$/;"	m	language:C++	class:ParticleSystemSerial
+setupFBO	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^GLuint glRenderer::setupFBO(GLuint texture) {$/;"	f	language:C++	class:glRenderer
+setupParticles	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::setupParticles() {$/;"	f	language:C++	class:glRenderer
+setupQuad	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::setupQuad() {$/;"	f	language:C++	class:glRenderer
+setupSkyBox	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::setupSkyBox() {$/;"	f	language:C++	class:glRenderer
+setupTexture	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^GLuint glRenderer::setupTexture() {$/;"	f	language:C++	class:glRenderer
+shadingPass	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::shadingPass(glm::mat4 projection, GLuint textureIn) {$/;"	f	language:C++	class:glRenderer
+skyBoxVertices	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^const GLfloat glRenderer::skyBoxVertices[108] = {$/;"	m	language:C++	class:glRenderer	file:
+spiky_const	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double spiky_const = 45.f\/(glm::pi<double>()*h*h*h*h*h*h);$/;"	m	language:C++	class:ParticleSystem
+spiky_prime	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^glm::vec3 ParticleSystemSerial::spiky_prime(glm::vec3 r) {$/;"	f	language:C++	class:ParticleSystemSerial
+spiky_prime	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    glm::vec3 spiky_prime(glm::vec3 r);$/;"	p	language:C++	class:ParticleSystemSerial
+step	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    virtual void step() = 0;$/;"	p	language:C++	class:ParticleSystem
+step	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^void ParticleSystemCUDA::step() {$/;"	f	language:C++	class:ParticleSystemCUDA
+step	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    void step();$/;"	p	language:C++	class:ParticleSystemCUDA
+step	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::step() {$/;"	f	language:C++	class:ParticleSystemSerial
+step	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void step();$/;"	p	language:C++	class:ParticleSystemSerial
+updateBuffer	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::updateBuffer() {$/;"	f	language:C++	class:glRenderer
+~glRenderer	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^glRenderer::~glRenderer() {$/;"	f	language:C++	class:glRenderer
+~ParticleSystemCUDA	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^ParticleSystemCUDA::~ParticleSystemCUDA() {$/;"	f	language:C++	class:ParticleSystemCUDA
+~ParticleSystemCUDA	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    virtual ~ParticleSystemCUDA();$/;"	p	language:C++	class:ParticleSystemCUDA
+~ParticleSystemSerial	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^ParticleSystemSerial::~ParticleSystemSerial() {$/;"	f	language:C++	class:ParticleSystemSerial
+~ParticleSystemSerial	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    virtual ~ParticleSystemSerial();$/;"	p	language:C++	class:ParticleSystemSerial

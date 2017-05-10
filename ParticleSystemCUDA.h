@@ -13,22 +13,27 @@
 #include <iostream>
 #include <unordered_map>
 #include "ParticleSystem.h"
+#include "cuda_runtime.h"
 
 class ParticleSystemCUDA : public ParticleSystem {
 
 public:
     ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max);
-    glm::vec3* getParticlePos();
+    float* getParticlePos();
     void step();
-    unsigned getParticleNum() { return numParticles; };
-    virtual ~ParticleSystemSerial();
+    unsigned getParticleNum() { return numParticles; }
+    virtual ~ParticleSystemCUDA();
 
 private:
-    glm::vec3 particlePos[numParticles];
-    glm::vec3 particlePosNext[numParticles];
-    glm::vec3 particleVel[numParticles];
-    glm::vec3 particleDensity[numParticles];
-    glm::vec3 particleLambda[numParticles];
+    float3* particlePos;
+    float3* particlePosNext;
+    float3* particleVel;
+    float3* particleDensity;
+    float3* particleLambda;
+    int* neighborCounts;
+    int* neighbors;
+    int* gridCount;
+    int* grid;
 };
 
 #endif //PBF_15418_PARTICLESYSTEMCUDA_H

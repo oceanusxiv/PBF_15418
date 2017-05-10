@@ -12,3 +12,15 @@ ParticleSystem(numParticles, bounds_max)
 
 }
 
+ParticleSystemCUDA::~ParticleSystemCUDA() {
+
+}
+
+float* ParticleSystemCUDA::getParticlePos() {
+    return &particlePos->x;
+}
+
+void ParticleSystemCUDA::step() {
+
+}
+

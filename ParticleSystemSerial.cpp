@@ -36,8 +36,8 @@ ParticleSystemSerial::~ParticleSystemSerial() {
 
 }
 
-glm::vec3* ParticleSystemSerial::getParticlePos() {
-    return &particlePos[0];
+float* ParticleSystemSerial::getParticlePos() {
+    return &particlePos[0].x;
 }
 
 double ParticleSystemSerial::poly6(glm::vec3 r) {

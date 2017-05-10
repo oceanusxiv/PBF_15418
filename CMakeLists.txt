@@ -17,7 +17,7 @@ if(APPLE)
     MARK_AS_ADVANCED (COCOA_LIBRARY)
     SET(EXTRA_LIBS ${COCOA_LIBRARY})
 else(APPLE)
-    include_directories(/afs/andrew.cmu.edu/usr13/cmaines/private/15418_spring/glm)
+    include_directories(/afs/andrew.cmu.edu/usr8/efang/private/glm/)
 endif (APPLE)
 
 include_directories(${GLFW_INCLUDE_DIRS})
@@ -34,7 +34,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h ParticleSystemSerial.cpp
         ParticleSystemSerial.h ParticleSystem.h Camera.h SOIL2.h Particle.h ParticleSystemCUDA.h ParticleSystemCUDA.cpp)
 
-add_executable(PBF_15418 ${SOURCE_FILES})
+cuda_add_executable(PBF_15418 ${SOURCE_FILES})
 
 if(APPLE)
     target_link_libraries(PBF_15418 ${EXTRA_LIBS})
@@ -43,4 +43,4 @@ else(APPLE)
     set(SOIL2_DIR ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
 endif(APPLE)
 
-target_link_libraries(PBF_15418 ${CUDA_LIBRARY} ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${SOIL2_DIR})
+target_link_libraries(PBF_15418 ${CUDA_LIBRARIES} ${CUDA_LIBRARY} ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${SOIL2_DIR})

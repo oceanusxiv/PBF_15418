@@ -29,7 +29,7 @@ class ParticleSystemSerial : public ParticleSystem {
 
 public:
     ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max);
-    glm::vec3* getParticlePos();
+    float* getParticlePos();
     void step();
     unsigned getParticleNum() { return numParticles; };
     virtual ~ParticleSystemSerial();

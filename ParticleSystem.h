@@ -16,7 +16,7 @@
 class ParticleSystem {
 
 public:
-    virtual glm::vec3* getParticlePos() = 0;
+    virtual float* getParticlePos() = 0;
     virtual void step() = 0;
     virtual unsigned getParticleNum() = 0;
 
