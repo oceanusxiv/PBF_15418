@@ -29,12 +29,13 @@ ParticleSystem(numParticles, bounds_max)
     params.gridX = int(ceil((bounds_max.x - bounds_min.x)/h));
     params.gridY = int(ceil((bounds_max.y - bounds_min.y)/h));
     params.gridZ = int(ceil((bounds_max.z - bounds_min.z)/h));
+    params.h = h;
     float thickness = 0.1;
     std::default_random_engine generator;
     std::uniform_real_distribution<float> distribution(bounds_min.x+5,bounds_max.x-5);
-    float3 particles[numParticles];
+    hostParticlePos = malloc(numParticles * sizeof(float3));
     for (int i = 0; i < numParticles; i++) {
-        particles[i] = make_float3(distribution(generator), distribution(generator), distribution(generator));
+        hostParticlePos[i] = make_float3(distribution(generator), distribution(generator), distribution(generator));
     }   
 
     int gridSize = params.gridX * params.gridY * params.gridZ;
@@ -61,6 +62,7 @@ ParticleSystem(numParticles, bounds_max)
 
     cudaCheck(cudaMemcpy(particlePos, particles, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
     cudaCheck(cudaMemcpy(particlePosNext, particles, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
+    cudaCheck(cudaMemcpyToSymbol("params", &params, sizeof(systemParams)));
     
 }
 
@@ -77,10 +79,11 @@ ParticleSystemCUDA::~ParticleSystemCUDA() {
 }
 
 float* ParticleSystemCUDA::getParticlePos() {
-    return &particlePos->x;
+    cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3)));
+    return &hostParticlePos[0].x;
 }
 
 void ParticleSystemCUDA::step() {
-
+    update(particleVel, particlePosNext, particlePos, neighborCounts, neighbors, gridCount, grid, particleDensity, particleLambda);
 }
 
