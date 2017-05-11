@@ -26,14 +26,14 @@ protected:
     glm::vec3 bounds_min = glm::vec3(0.0, 0.0, 0.0);
     glm::vec3 bounds_max;
     const int iterations = 10;
-    const double dt = 0.05;
+    const double dt = 0.02;
     const double h = 1.5;
-    const double rest_density = 1000;
+    const double rest_density = 2000;
     const double epsilon = 0.01;
-    const double k = 0.1;
+    const double k = 0.01;
     const double delta_q = 0.2*h;
     const double dist_from_bound = 0.0001;
-    const double c = 0.01;
+    const double c = 0.1;
     const double poly6_const = 315.f/(64.f*glm::pi<double>()*h*h*h*h*h*h*h*h*h);
     const double spiky_const = 45.f/(glm::pi<double>()*h*h*h*h*h*h);
 

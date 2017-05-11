@@ -4,13 +4,18 @@
 
 #include "ParticleSystemCUDA.h"
 #include <random>
+#include <math.h>
 
 void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *lambda);
 void initialize(struct systemParams *p);
 
 #define cudaCheck(x) { cudaError_t err = x; if (err != cudaSuccess) { printf("Cuda error: %d in %s at %s:%d\n", err, #x, __FILE__, __LINE__); assert(0); } }
 
-ParticleSystemCUDA::ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max) :
+inline float3 operator + (float3 a, float3 b) {
+  return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+ParticleSystemCUDA::ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max, std::string config) :
 ParticleSystem(numParticles, bounds_max)
 {
     systemParams params;
@@ -35,12 +40,40 @@ ParticleSystem(numParticles, bounds_max)
     params.gridZ = int(ceil((bounds_max.z - bounds_min.z)/h));
     params.h = h;
     float thickness = 0.1;
-    std::default_random_engine generator;
-    std::uniform_real_distribution<float> distribution(bounds_min.x+5,bounds_max.x-5);
     hostParticlePos = (float3 *)malloc(numParticles * sizeof(float3));
-    for (int i = 0; i < numParticles; i++) {
-        hostParticlePos[i] = make_float3(distribution(generator), distribution(generator), distribution(generator));
-    }   
+    std::default_random_engine generator;
+
+    if (config == "dam") {
+        std::uniform_real_distribution<float> distributionX(bounds_min.x + 0.1, bounds_min.x + 40);
+        std::uniform_real_distribution<float> distributionY(bounds_min.y + 0.1, bounds_max.y - 0.1);
+        std::uniform_real_distribution<float> distributionZ(bounds_min.z + 0.1, bounds_max.z -0.1);
+        for (int i = 0; i < numParticles; i++) {
+            hostParticlePos[i] = make_float3(distributionX(generator), distributionY(generator), distributionZ(generator));
+        } 
+    }
+    else if (config == "sphere") {
+        float r = std::min(std::min(bounds_max.x - bounds_min.x, bounds_max.y - bounds_min.y), bounds_max.z - bounds_min.z)/2.0;
+        float3 offset = make_float3((bounds_max.x - bounds_min.x)/2.0, (bounds_max.y - bounds_min.y)/2.0, (bounds_max.z - bounds_min.z)/2.0);
+        std::uniform_real_distribution<float> distributionR(-r, r);
+        float x, y, z;
+        for (int i = 0; i < numParticles; i++) {
+            do {
+                x = distributionR(generator);
+                y = distributionR(generator);
+                z = distributionR(generator);
+            } while (x*x + y*y + z*z >= r*r);
+            hostParticlePos[i] = make_float3(x, y, z) + offset;
+        } 
+    }
+    else {
+
+        std::uniform_real_distribution<float> distribution(bounds_min.x+5, bounds_max.x-5);
+    
+        for (int i = 0; i < numParticles; i++) {
+            hostParticlePos[i] = make_float3(distribution(generator), distribution(generator), distribution(generator));
+        }   
+    }
+
 
     gridSize = params.gridX * params.gridY * params.gridZ;
 

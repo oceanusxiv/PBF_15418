@@ -10,7 +10,10 @@ int main(int argc, char *argv[]) {
     int width = 640;
     int height = 480;
     std::string srcPath = "./";
-
+    int boundX = 30;
+    int boundY = 30;
+    int boundZ = 30;
+    std::string config = "dam";
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--num")) {
             numParticles = std::stoi(argv[i + 1]);
@@ -22,9 +25,17 @@ int main(int argc, char *argv[]) {
         if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--path")) {
             srcPath = argv[i + 1];
         }
+        if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--bounds")) {
+            boundX = std::stoi(argv[i + 1]);
+            boundY = std::stoi(argv[i + 2]);
+            boundZ = std::stoi(argv[i + 3]);
+        }
+        if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config")) {
+            config = argv[i + 1];
+        }
     }
 
-    ParticleSystemCUDA sim(numParticles, glm::vec3(30, 30, 30));
+    ParticleSystemCUDA sim(numParticles, glm::vec3(boundX, boundY, boundZ), config);
 
     glWindow simWindow(width, height);
     simWindow.init();

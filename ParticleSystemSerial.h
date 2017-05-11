@@ -28,7 +28,7 @@ typedef std::unordered_multimap<std::tuple<size_t, size_t, size_t>, Particle *, 
 class ParticleSystemSerial : public ParticleSystem {
 
 public:
-    ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max);
+    ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max, std::string config);
     float* getParticlePos();
     void step();
     unsigned getParticleNum() { return numParticles; };
