@@ -20,7 +20,7 @@ ParticleSystem(numParticles, bounds_max)
     params.maxNeighbors = maxNeighbors;
     params.particleCount = numParticles;
     params.bounds_min = make_float3(bounds_min.x, bounds_min.y, bounds_min.z);
-    params.bounds_max = make_float3(bounds_max.x, bounds_max.y, bounds_min.z);
+    params.bounds_max = make_float3(bounds_max.x, bounds_max.y, bounds_max.z);
     params.gravity = make_float3(gravity.x, gravity.y, gravity.z);
     params.dist_from_bound = dist_from_bound;
     params.delta_q = delta_q;
