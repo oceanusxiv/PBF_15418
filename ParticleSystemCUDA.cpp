@@ -6,6 +6,7 @@
 #include <random>
 
 void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda);
+void initialize(struct systemParams *p);
 
 #define cudaCheck(x) { cudaError_t err = x; if (err != cudaSuccess) { printf("Cuda error: %d in %s at %s:%d\n", err, #x, __FILE__, __LINE__); assert(0); } }
 
@@ -65,8 +66,7 @@ ParticleSystem(numParticles, bounds_max)
 
     cudaCheck(cudaMemcpy(particlePos, hostParticlePos, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
     cudaCheck(cudaMemcpy(particlePosNext, hostParticlePos, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
-    cudaCheck(cudaMemcpyToSymbol("params", &params, sizeof(systemParams)));
-    
+    initialize(&params);
 }
 
 ParticleSystemCUDA::~ParticleSystemCUDA() {
