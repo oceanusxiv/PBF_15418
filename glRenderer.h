@@ -18,7 +18,7 @@
 class glRenderer {
 
 public:
-    glRenderer(int width, int height, Camera& camera, ParticleSystemSerial &sim, std::string srcPath) :
+    glRenderer(int width, int height, Camera& camera, ParticleSystem &sim, std::string srcPath) :
             depthShader(srcPath + "shaders/depth_vs.glsl", srcPath + "shaders/depth_fs.glsl"),
             skyBoxShader(srcPath + "shaders/skybox_vs.glsl", srcPath + "shaders/skybox_fs.glsl"),
             blurShader(srcPath + "shaders/texture_vs.glsl", srcPath + "shaders/blur_fs.glsl"),
