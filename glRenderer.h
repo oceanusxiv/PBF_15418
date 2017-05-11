@@ -14,7 +14,6 @@
 #include "Camera.h"
 #include "ParticleSystem.h"
 
-
 class glRenderer {
 
 public:
@@ -31,6 +30,9 @@ public:
     ~glRenderer();
     int init();
     void onDraw();
+    #ifdef DEVICE_RENDER
+    cudaGraphicsResource_t *resources;
+    #endif /* DEVICE_RENDER */
 
 private:
     static inline GLuint loadTexture(GLchar* path)

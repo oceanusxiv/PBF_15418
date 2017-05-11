@@ -1,4 +1,5 @@
 #include "ParticleSystemCUDA.h"
+
 #define cudaCheck(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
 {
@@ -150,8 +151,40 @@ __global__ void grid_kernel(int *grid_counts, int *grid, float3 *position_next) 
   }
 }
 
-void find_neighbors(int particleCount, int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
+__global__ void cell_map_kernel(int *output, float3 *position_next) {
+  int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
+
+  int cell_index = pos_to_cell_idx(position_next[particle_index]);
+  output[particle_index] = cell_index;
+}
+
+__global__ void get_offset_kernel(int *offsets, int *cell_indices) {
+  int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (particle_index >= params.particleCount) return;
+  
+  if (particle_index == 0) {
+    offsets[cell_indices[0]] = 0;
+  } else if (cell_indices[particle_index - 1] != cell_indices[particle_index]) {
+    offsets[cell_indices[particle_index]] = particle_index;
+  }
+} 
+
+void find_neighbors(int gridSize, int particleCount, int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
+
+  //cell_map_kernel<<<blocks, NUM_THREADS>>>(neighbor_counts, position_next);
+  //cudaThreadSynchronize();
+  //sort position
+  //sort position next
+  //sort velocity
+
+  //thrust::gather(indices.begin(), indices.end(), d_x.begin(), d_x.begin());
+  //thrust::gather(indices.begin(), indices.end(), d_y.begin(), d_y.begin());
+  //thrust::gather(indices.begin(), indices.end(), d_z.begin(), d_z.begin());
+
+  //cudaMemset(grid_counts, -1, sizeof(int) * gridSize);
+  //get_offset_kernel<<<blocks, NUM_THREADS>>>(grid_counts, neighbor_counts);
 
   grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid, position_next);
   cudaThreadSynchronize();
@@ -270,7 +303,7 @@ void update(int gridSize, int particleCount, int iterations, float3 *velocity, f
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
   cudaMemset(grid_counts, 0, sizeof(int) * gridSize);
-  find_neighbors(particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next);
+  find_neighbors(gridSize, particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next);
 
   for (int iter = 0; iter < iterations; iter++) {
     get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
