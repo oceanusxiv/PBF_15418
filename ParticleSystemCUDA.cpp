@@ -79,6 +79,7 @@ ParticleSystemCUDA::~ParticleSystemCUDA() {
     cudaCheck(cudaFree(neighbors));
     cudaCheck(cudaFree(gridCount));
     cudaCheck(cudaFree(grid));
+    free(hostParticlePos);
 }
 
 float* ParticleSystemCUDA::getParticlePos() {

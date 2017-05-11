@@ -96,7 +96,7 @@ inline __device__ int pos_to_cell_idx(float3 pos) {
       pos.z <= params.bounds_min.z || pos.z >= params.bounds_max.z) {
     return -1;
   } else {
-    return (((int)floorf(pos.x / params.h)) * params.gridX * params.gridY  + ((int)floorf(pos.y / params.h)) * params.gridY + ((int)floorf(pos.z / params.h)));
+    return ((int)floorf(pos.z / params.h) * params.gridY  + (int)floorf(pos.y / params.h)) * params.gridX + (int)floorf(pos.x / params.h);
   }
 }
 

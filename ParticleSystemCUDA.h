@@ -33,7 +33,7 @@ struct systemParams {
     int gridX;
     int gridY;
     int gridZ;
-    int h;
+    float h;
 };
 
 class ParticleSystemCUDA : public ParticleSystem {
