@@ -42,7 +42,7 @@ inline __device__ float length2(float3 a) {
 }
 
 inline __device__ float length(float3 a) {
-  return 0.0f;//sqrt(length2(a));
+  return sqrt(length2(a));
 }
 
 inline __device__ float l2Norm(float3 a, float3 b) {
