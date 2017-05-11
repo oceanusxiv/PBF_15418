@@ -7,8 +7,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <glm/gtx/norm.hpp>
-#include <glm/ext.hpp>
 #include <vector>
 #include <iostream>
 #include <unordered_map>
@@ -51,8 +49,8 @@ private:
     float3* particlePos;
     float3* particlePosNext;
     float3* particleVel;
-    float3* particleDensity;
-    float3* particleLambda;
+    float* particleDensity;
+    float* particleLambda;
     float3* hostParticlePos;
     int* neighborCounts;
     int* neighbors;

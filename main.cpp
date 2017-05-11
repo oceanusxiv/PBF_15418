@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    ParticleSystemSerial sim(numParticles, glm::vec3(30, 30, 30));
+    ParticleSystemCUDA sim(numParticles, glm::vec3(30, 30, 30));
 
     glWindow simWindow(width, height);
     simWindow.init();

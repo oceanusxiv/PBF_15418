@@ -33,7 +33,7 @@ inline __device__ float length2(float3 a) {
 }
 
 inline __device__ float length(float3 a) {
-  return sqrt(length2(a));
+  return 0.0f;//sqrt(length2(a));
 }
 
 inline __device__ float l2Norm(float3 a, float3 b) {
@@ -132,8 +132,8 @@ __global__ void grid_kernel(int *grid_counts, int *grid) {
   }
 }
 
-void find_neighbors(int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
-  int blocks = (params.particleCount + NUM_THREADS - 1) / NUM_THREADS;
+void find_neighbors(int particleCount, int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
+  int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid);
   neighbor_kernel<<<blocks, NUM_THREADS>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
@@ -240,8 +240,7 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
   position[particle_index] = position_next[particle_index];
 }
 
-void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts,
-     int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
+void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
@@ -249,7 +248,7 @@ void update(int particleCount, int iterations, float3 *velocity, float3 *positio
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
   cudaMemset(grid_counts, 0, sizeof(int) * particleCount);
-  find_neighbors(grid_counts, grid, neighbor_counts, neighbors, position_next);
+  find_neighbors(particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next);
 
   for (int iter = 0; iter < iterations; iter++) {
     get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, density, lambda);

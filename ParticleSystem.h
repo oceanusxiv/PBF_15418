@@ -7,8 +7,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <glm/gtx/norm.hpp>
-#include <glm/ext.hpp>
 #include <vector>
 #include <iostream>
 #include "Particle.h"

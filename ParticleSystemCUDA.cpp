@@ -5,6 +5,7 @@
 #include "ParticleSystemCUDA.h"
 #include <random>
 
+void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda);
 
 ParticleSystemCUDA::ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max) :
 ParticleSystem(numParticles, bounds_max)
@@ -60,8 +61,8 @@ ParticleSystem(numParticles, bounds_max)
     cudaCheck(cudaMemset(gridCount, 0, gridSize * sizeof(int)));
     cudaCheck(cudaMemset(grid, 0, gridSize * params.maxGridCount * sizeof(int)));
 
-    cudaCheck(cudaMemcpy(particlePos, particles, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
-    cudaCheck(cudaMemcpy(particlePosNext, particles, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
+    cudaCheck(cudaMemcpy(particlePos, hostParticlePos, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
+    cudaCheck(cudaMemcpy(particlePosNext, hostParticlePos, numParticles * sizeof(float3), cudaMemcpyHostToDevice));
     cudaCheck(cudaMemcpyToSymbol("params", &params, sizeof(systemParams)));
     
 }
@@ -79,7 +80,7 @@ ParticleSystemCUDA::~ParticleSystemCUDA() {
 }
 
 float* ParticleSystemCUDA::getParticlePos() {
-    cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3)));
+    cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
     return &hostParticlePos[0].x;
 }
 

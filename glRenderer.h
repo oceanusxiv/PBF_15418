@@ -12,7 +12,7 @@
 #include <vector>
 #include "shader.h"
 #include "Camera.h"
-#include "ParticleSystemSerial.h"
+#include "ParticleSystem.h"
 
 
 class glRenderer {
@@ -90,7 +90,7 @@ private:
     GLuint setupFBO(GLuint texture);
     GLuint setupTexture();
     Camera &camera;
-    ParticleSystemSerial &simulation;
+    ParticleSystem &simulation;
     GLuint particleVAO, particleVBO, skyBoxVAO, skyBoxVBO, cubeMapTexture, quadVAO, quadVBO,
             firstFBO, secondFBO, thicknessTexture, textureOne, textureTwo;
     Shader depthShader, skyBoxShader, blurShader, shadingShader;
