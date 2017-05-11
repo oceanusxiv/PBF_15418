@@ -154,7 +154,9 @@ void find_neighbors(int particleCount, int *grid_counts, int *grid, int *neighbo
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid, position_next);
+  cudaThreadSynchronize();
   neighbor_kernel<<<blocks, NUM_THREADS>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
+  cudaThreadSynchronize();
 }
 
 __global__ void collision_check(float3 *position_next, float3 *velocity) {
@@ -262,6 +264,7 @@ void update(int gridSize, int particleCount, int iterations, float3 *velocity, f
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
+  cudaThreadSynchronize();
 
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
@@ -270,8 +273,11 @@ void update(int gridSize, int particleCount, int iterations, float3 *velocity, f
 
   for (int iter = 0; iter < iterations; iter++) {
     get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, density, lambda);
+    cudaThreadSynchronize();
     apply_pressure<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
+    cudaThreadSynchronize();
     collision_check<<<blocks, NUM_THREADS>>>(position_next, velocity);
+    cudaThreadSynchronize();
   }
 
   apply_viscosity<<<blocks, NUM_THREADS>>>(velocity, position, position_next, neighbor_counts, neighbors);
