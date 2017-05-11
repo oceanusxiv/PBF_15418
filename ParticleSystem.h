@@ -5,7 +5,7 @@
 #ifndef PBF_15418_PARTICLESYSTEM_H
 #define PBF_15418_PARTICLESYSTEM_H
 
-#define DEVICE_RENDER
+// #define DEVICE_RENDER
 
 #ifdef DEVICE_RENDER
 #include <cuda_runtime.h>

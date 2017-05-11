@@ -1,4 +1,7 @@
 #include "ParticleSystemCUDA.h"
+#include <thrust/sort.h>
+#include <thrust/device_ptr.h>
+#include <thrust/device_vector.h>
 
 #define cudaCheck(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
@@ -170,26 +173,44 @@ __global__ void get_offset_kernel(int *offsets, int *cell_indices) {
   }
 } 
 
-void find_neighbors(int gridSize, int particleCount, int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
+void find_neighbors(int gridSize, int particleCount, int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next, float3 *position, float3 *velocity) {
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
-  //cell_map_kernel<<<blocks, NUM_THREADS>>>(neighbor_counts, position_next);
+  // Holds cell for given particle index
+  cell_map_kernel<<<blocks, NUM_THREADS>>>(neighbor_counts, position_next);
+  cudaThreadSynchronize();
+
+  thrust::device_ptr<float3> t_position(position);
+  thrust::device_ptr<float3> t_position_next(position_next);
+  thrust::device_ptr<float3> t_velocity(velocity);
+  thrust::device_ptr<int> keys(neighbor_counts);
+
+  thrust::device_vector<float3> sorted_position(particleCount);
+  thrust::device_vector<float3> sorted_position_next(particleCount);
+  thrust::device_vector<float3> sorted_velocity(particleCount);
+
+  thrust::counting_iterator<int> iter(0);
+  thrust::device_vector<int> indices(particleCount);
+  thrust::copy(iter, iter + indices.size(), indices.begin());
+  thrust::sort_by_key(keys, keys + particleCount, indices.begin());
+
+  thrust::gather(indices.begin(), indices.end(), t_position, sorted_position.begin());
+  thrust::gather(indices.begin(), indices.end(), t_position_next, sorted_position_next.begin());
+  thrust::gather(indices.begin(), indices.end(), t_velocity, sorted_velocity.begin());
+
+  thrust::copy(sorted_position.begin(), sorted_position.end(), thrust::raw_pointer_cast(position));
+  thrust::copy(sorted_position_next.begin(), sorted_position_next.end(), thrust::raw_pointer_cast(position_next));
+  thrust::copy(sorted_velocity.begin(), sorted_velocity.end(), thrust::raw_pointer_cast(velocity));
+
+  cudaMemset(grid_counts, -1, sizeof(int) * gridSize);
+  // Grid Counts holds offset into Position for given cell
+  get_offset_kernel<<<blocks, NUM_THREADS>>>(grid_counts, neighbor_counts);
+  cudaThreadSynchronize();
+
+  //grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid, position_next);
   //cudaThreadSynchronize();
-  //sort position
-  //sort position next
-  //sort velocity
-
-  //thrust::gather(indices.begin(), indices.end(), d_x.begin(), d_x.begin());
-  //thrust::gather(indices.begin(), indices.end(), d_y.begin(), d_y.begin());
-  //thrust::gather(indices.begin(), indices.end(), d_z.begin(), d_z.begin());
-
-  //cudaMemset(grid_counts, -1, sizeof(int) * gridSize);
-  //get_offset_kernel<<<blocks, NUM_THREADS>>>(grid_counts, neighbor_counts);
-
-  grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid, position_next);
-  cudaThreadSynchronize();
-  neighbor_kernel<<<blocks, NUM_THREADS>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
-  cudaThreadSynchronize();
+  //neighbor_kernel<<<blocks, NUM_THREADS>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
+  //cudaThreadSynchronize();
 }
 
 __global__ void collision_check(float3 *position_next, float3 *velocity) {
@@ -223,11 +244,43 @@ __global__ void collision_check(float3 *position_next, float3 *velocity) {
   }
 }
 
-__device__ float3 get_delta_pos(int particle_index, int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
+__device__ float3 get_delta_pos(int *grid_counts, int particle_index, int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
   float w_dq = poly6(params.delta_q * make_vector(1.0f));
   float3 delta_pos = make_vector(0.0f);
 
-  int neighbor_count = neighbor_counts[particle_index];
+  // int neighbor_count = neighbor_counts[particle_index];
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        float3 p = position_next[particle_index];
+        int cell = pos_to_cell_idx(make_float3(p.x + x * params.h, p.y + y * params.h, p.z + z * params.h));
+        if (cell < 0) continue;
+        int neighbor_index = grid_counts[cell];
+        while (true) {
+          if (neighbor_index >= params.particleCount) break;
+          
+          if (neighbor_counts[neighbor_index] != cell) break;
+
+          if (neighbor_index != particle_index) {
+
+            float3 d = position_next[particle_index] - position_next[neighbor_index];
+
+            float kernel_ratio = poly6(d) / w_dq;
+            if (w_dq < EPSILON) {
+              kernel_ratio = 0.0f;
+            }
+
+            float scorr = -params.k * (kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio);
+            delta_pos = delta_pos + (lambda[particle_index] + lambda[neighbor_index] + scorr) * spiky_prime(d);
+
+          }
+
+          neighbor_index++;
+        }
+      }
+    }
+  }
+  /*
   for (int i = 0; i < neighbor_count; i++) {
     int neighbor_index = neighbors[particle_index * params.maxNeighbors + i];
     float3 d = position_next[particle_index] - position_next[neighbor_index];
@@ -240,11 +293,12 @@ __device__ float3 get_delta_pos(int particle_index, int *neighbor_counts, int *n
     float scorr = -params.k * (kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio);
     delta_pos = delta_pos + (lambda[particle_index] + lambda[neighbor_index] + scorr) * spiky_prime(d);
   }
+  */
 
   return (1.0f / params.rest_density) * delta_pos;
 }
 
-__global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
+__global__ void get_lambda(int *grid_counts, int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
@@ -252,7 +306,36 @@ __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *positio
   float ci_gradient = 0.0f;
   float3 accum = make_vector(0.0f);
 
-  int neighbor_count = neighbor_counts[particle_index];
+  // int neighbor_count = neighbor_counts[particle_index];
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        float3 p = position_next[particle_index];
+        int cell = pos_to_cell_idx(make_float3(p.x + x * params.h, p.y + y * params.h, p.z + z * params.h));
+        if (cell < 0) continue;
+        int neighbor_index = grid_counts[cell];
+        while (true) {
+          if (neighbor_index >= params.particleCount) break;
+          
+          if (neighbor_counts[neighbor_index] != cell) break;
+
+          if (neighbor_index != particle_index) {
+
+            float3 v = position_next[particle_index] - position_next[neighbor_index];
+            density_i += poly6(v);
+
+            float3 sp = spiky_prime(v);
+            ci_gradient += length2(-1.0f / params.rest_density * sp);
+            accum = accum + sp;
+          }
+
+          neighbor_index++;
+        }
+      }
+    }
+  }
+
+  /*
   for (int i = 0; i < neighbor_count; i++) {
     int neighbor_index = neighbors[particle_index * params.maxNeighbors + i];
     float3 v = position_next[particle_index] - position_next[neighbor_index];
@@ -261,32 +344,56 @@ __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *positio
     float3 sp = spiky_prime(v);
     ci_gradient += length2(-1.0f / params.rest_density * sp);
     accum = accum + sp;
-  }
+  }*/
 
   float constraint_i = density_i / params.rest_density - 1.0f;
   ci_gradient += length2((1.0f / params.rest_density) * accum) + params.epsilon;
   lambda[particle_index] = -1.0f * (constraint_i / ci_gradient);
 }
 
-__global__ void apply_pressure(int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
+__global__ void apply_pressure(int *grid_counts, int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
-  position_next[particle_index] = position_next[particle_index] + get_delta_pos(particle_index, neighbor_counts, neighbors, position_next, lambda);
+  position_next[particle_index] = position_next[particle_index] + get_delta_pos(grid_counts, particle_index, neighbor_counts, neighbors, position_next, lambda);
 }
 
-__global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *position_next, int *neighbor_counts, int *neighbors) {
+__global__ void apply_viscosity(int *grid_counts, float3 *velocity, float3 *position, float3 *position_next, int *neighbor_counts, int *neighbors) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
   // Get the viscosity
   float3 viscosity = make_vector(0.0f);
 
-  int neighbor_count = neighbor_counts[particle_index];
+  // int neighbor_count = neighbor_counts[particle_index];
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        float3 p = position_next[particle_index];
+        int cell = pos_to_cell_idx(make_float3(p.x + x * params.h, p.y + y * params.h, p.z + z * params.h));
+        if (cell < 0) continue;
+        int neighbor_index = grid_counts[cell];
+        while (true) {
+          if (neighbor_index >= params.particleCount) break;
+          
+          if (neighbor_counts[neighbor_index] != cell) break;
+
+          if (neighbor_index != particle_index) {
+
+            viscosity = viscosity + poly6(position[particle_index] - position[neighbor_index]) * (velocity[particle_index] - velocity[neighbor_index]);
+          }
+
+          neighbor_index++;
+        }
+      }
+    }
+  }
+
+  /*
   for (int i = 0; i < neighbor_count; i++) {
     int neighbor_index = neighbors[particle_index * params.maxNeighbors + i];
     viscosity = viscosity + poly6(position[particle_index] - position[neighbor_index]) * (velocity[particle_index] - velocity[neighbor_index]);
-  }
+  }*/
 
   velocity[particle_index] = (1.0f / params.dt) * (position_next[particle_index] - position[particle_index]) + params.c * viscosity;
   position[particle_index] = position_next[particle_index];
@@ -303,18 +410,18 @@ void update(int gridSize, int particleCount, int iterations, float3 *velocity, f
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
   cudaMemset(grid_counts, 0, sizeof(int) * gridSize);
-  find_neighbors(gridSize, particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next);
+  find_neighbors(gridSize, particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next, position, velocity);
 
   for (int iter = 0; iter < iterations; iter++) {
-    get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
+    get_lambda<<<blocks, NUM_THREADS>>>(grid_counts, neighbor_counts, neighbors, position_next, lambda);
     cudaThreadSynchronize();
-    apply_pressure<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
+    apply_pressure<<<blocks, NUM_THREADS>>>(grid_counts, neighbor_counts, neighbors, position_next, lambda);
     cudaThreadSynchronize();
     collision_check<<<blocks, NUM_THREADS>>>(position_next, velocity);
     cudaThreadSynchronize();
   }
 
-  apply_viscosity<<<blocks, NUM_THREADS>>>(velocity, position, position_next, neighbor_counts, neighbors);
+  apply_viscosity<<<blocks, NUM_THREADS>>>(grid_counts, velocity, position, position_next, neighbor_counts, neighbors);
 }
 
 void initialize(struct systemParams *p) {
