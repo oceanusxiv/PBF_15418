@@ -1,8 +1,17 @@
 #include "ParticleSystemCUDA.h"
+#define cudaCheck(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+     if (code != cudaSuccess) 
+          {
+                  fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+                        if (abort) exit(code);
+                           }
+}
 
 #define EPSILON 0.0000000001f
 #define NUM_THREADS 256
-__constant__ systemParams params;
+__constant__ struct systemParams params;
 
 /**
  * Operators for vector operations
@@ -257,4 +266,8 @@ void update(int particleCount, int iterations, float3 *velocity, float3 *positio
   }
 
   apply_viscosity<<<blocks, NUM_THREADS>>>(velocity, position, position_next, neighbor_counts, neighbors);
+}
+
+void initialize(struct systemParams *p) {
+  cudaCheck(cudaMemcpyToSymbol(params, p, sizeof(struct systemParams)));
 }
