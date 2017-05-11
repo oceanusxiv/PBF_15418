@@ -56,13 +56,6 @@ private:
     int* neighbors;
     int* gridCount;
     int* grid;
-    inline void cudaCheck(cudaError_t x) {
-        cudaError_t err = x;
-        if (err != cudaSuccess) {
-            std::cout << cudaGetErrorString(err) << std::endl;
-            assert(0);
-        }
-    }
 };
 
 #endif //PBF_15418_PARTICLESYSTEMCUDA_H
