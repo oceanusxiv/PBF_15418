@@ -10,6 +10,7 @@ find_package(CUDA REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
 if(APPLE)
     INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
