@@ -91,7 +91,13 @@ __device__ float3 spiky_prime(float3 r) {
 
 inline __device__ int pos_to_cell_idx(float3 pos) {
 //TODO
-  return (((int)floorf(pos.x / params.h)) * params.gridX * params.gridY  + ((int)floorf(pos.y / params.h)) * params.gridY + ((int)floorf(pos.z / params.h)));
+  if (pos.x <= params.bounds_min.x || pos.x >= params.bounds_max.x ||
+      pos.y <= params.bounds_min.y || pos.y >= params.bounds_max.y ||
+      pos.z <= params.bounds_min.z || pos.z >= params.bounds_max.z) {
+    return -1;
+  } else {
+    return (((int)floorf(pos.x / params.h)) * params.gridX * params.gridY  + ((int)floorf(pos.y / params.h)) * params.gridY + ((int)floorf(pos.z / params.h)));
+  }
 }
 
 /** End of helpers **/
@@ -101,7 +107,7 @@ __global__ void apply_forces(float3 *velocity, float3 *position_next, float3 *po
   if (particle_index >= params.particleCount) return;
 
   float3 v = params.dt * params.gravity;
-  velocity[particle_index] = v;
+  velocity[particle_index] = velocity[particle_index] + v;
   position_next[particle_index] = position[particle_index] + params.dt * v;
 }
 
@@ -131,20 +137,21 @@ __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int
   }
 }
 
-__global__ void grid_kernel(int *grid_counts, int *grid) {
+__global__ void grid_kernel(int *grid_counts, int *grid, float3 *position_next) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
-  int idx = atomicAdd(&grid_counts[particle_index], 1);
+  int cell_index = pos_to_cell_idx(position_next[particle_index]);
+  int idx = atomicAdd(&grid_counts[cell_index], 1);
   if (idx < params.maxGridCount) {
-    grid[particle_index * params.maxGridCount + idx] = particle_index;
+    grid[cell_index * params.maxGridCount + idx] = particle_index;
   }
 }
 
 void find_neighbors(int particleCount, int *grid_counts, int *grid, int *neighbor_counts, int *neighbors, float3 *position_next) {
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
-  grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid);
+  grid_kernel<<<blocks, NUM_THREADS>>>(grid_counts, grid, position_next);
   neighbor_kernel<<<blocks, NUM_THREADS>>>(position_next, neighbor_counts, neighbors, grid_counts, grid);
 }
 
@@ -249,14 +256,14 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
   position[particle_index] = position_next[particle_index];
 }
 
-void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
+void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
 
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
-  cudaMemset(grid_counts, 0, sizeof(int) * particleCount);
+  cudaMemset(grid_counts, 0, sizeof(int) * gridSize);
   find_neighbors(particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next);
 
   for (int iter = 0; iter < iterations; iter++) {
