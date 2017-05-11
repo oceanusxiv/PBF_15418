@@ -114,11 +114,11 @@ ParticleSystemCUDA::~ParticleSystemCUDA() {
 
 float* ParticleSystemCUDA::getParticlePos() {
     #ifdef DEVICE_RENDER
-    cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    return &hostParticlePos[0].x;
+    return (float *)particlePos;
 
     #else
-    return &particlePos[0].x;
+    cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
+    return &hostParticlePos[0].x;
 
     #endif /* DEVICE_RENDER */
 }

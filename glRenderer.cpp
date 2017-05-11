@@ -3,6 +3,7 @@
 //
 
 #include "glRenderer.h"
+#define cudaCheck(x) { cudaError_t err = x; if (err != cudaSuccess) { printf("Cuda error: %d in %s at %s:%d\n", err, #x, __FILE__, __LINE__); assert(0); } }
 
 const GLfloat glRenderer::skyBoxVertices[108] = {
         // Positions
@@ -221,10 +222,11 @@ void glRenderer::setupParticles() {
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
 
     #ifdef DEVICE_RENDER
+    glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, 0, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     cudaGraphicsGLRegisterBuffer(resources, particleVBO, cudaGraphicsRegisterFlagsNone);
     #else
     glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, simulation.getParticlePos(), GL_STREAM_DRAW);
-    #endif /* DEVICE_RENDER */
 
     glGenVertexArrays(1, &particleVAO);
     glBindVertexArray(particleVAO);
@@ -234,6 +236,7 @@ void glRenderer::setupParticles() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    #endif /* DEVICE_RENDER */
 }
 
 void glRenderer::updateBuffer() {
@@ -241,12 +244,12 @@ void glRenderer::updateBuffer() {
     //Update the VBO
     #ifdef DEVICE_RENDER
     void* particlePosPtr;
-    cudaGraphicsMapResources(1, resources);
+    cudaCheck(cudaGraphicsMapResources(1, resources));
     size_t size;
 
     cudaGraphicsResourceGetMappedPointer(&particlePosPtr, &size, resources[0]);
     float *pos = simulation.getParticlePos();
-    cudaMemcpy(particlePosPtr, pos, simulation.getParticleNum() * sizeof(float) * 3, cudaMemcpyDeviceToDevice);
+    cudaCheck(cudaMemcpy(particlePosPtr, pos, simulation.getParticleNum() * sizeof(float) * 3, cudaMemcpyDeviceToDevice));
 
     cudaGraphicsUnmapResources(1, resources);
 
