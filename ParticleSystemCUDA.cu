@@ -108,7 +108,7 @@ __global__ void apply_forces(float3 *velocity, float3 *position_next, float3 *po
 
   float3 v = params.dt * params.gravity;
   velocity[particle_index] = velocity[particle_index] + v;
-  position_next[particle_index] = position[particle_index] + params.dt * v;
+  position_next[particle_index] = position[particle_index] + params.dt * velocity[particle_index];
 }
 
 __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid) {
@@ -142,9 +142,11 @@ __global__ void grid_kernel(int *grid_counts, int *grid, float3 *position_next) 
   if (particle_index >= params.particleCount) return;
 
   int cell_index = pos_to_cell_idx(position_next[particle_index]);
-  int idx = atomicAdd(&grid_counts[cell_index], 1);
-  if (idx < params.maxGridCount) {
-    grid[cell_index * params.maxGridCount + idx] = particle_index;
+  if (cell_index >= 0) {
+    int idx = atomicAdd(&grid_counts[cell_index], 1);
+    if (idx < params.maxGridCount) {
+      grid[cell_index * params.maxGridCount + idx] = particle_index;
+    }
   }
 }
 
