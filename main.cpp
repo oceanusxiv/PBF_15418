@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     int boundX = 30;
     int boundY = 30;
     int boundZ = 30;
-
+    std::string config = "dam";
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--num")) {
             numParticles = std::stoi(argv[i + 1]);
@@ -30,9 +30,12 @@ int main(int argc, char *argv[]) {
             boundY = std::stoi(argv[i + 2]);
             boundZ = std::stoi(argv[i + 3]);
         }
+        if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "--config")) {
+            config = argv[i + 1];
+        }
     }
 
-    ParticleSystemCUDA sim(numParticles, glm::vec3(boundX, boundY, boundZ));
+    ParticleSystemCUDA sim(numParticles, glm::vec3(boundX, boundY, boundZ), config);
 
     glWindow simWindow(width, height);
     simWindow.init();

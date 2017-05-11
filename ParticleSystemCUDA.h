@@ -39,7 +39,7 @@ struct systemParams {
 class ParticleSystemCUDA : public ParticleSystem {
 
 public:
-    ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max);
+    ParticleSystemCUDA(unsigned numParticles, glm::vec3 bounds_max, std::string config);
     float* getParticlePos();
     void step();
     unsigned getParticleNum() { return numParticles; }

@@ -5,7 +5,7 @@
 #include "ParticleSystemSerial.h"
 #include <random>
 
-ParticleSystemSerial::ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max) :
+ParticleSystemSerial::ParticleSystemSerial(unsigned numParticles, glm::vec3 bounds_max, std::string config) :
 ParticleSystem(numParticles, bounds_max),
 neighborHash(5, keyHash, keyEqual)
 {
