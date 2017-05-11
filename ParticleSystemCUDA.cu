@@ -265,6 +265,8 @@ void update(int gridSize, int particleCount, int iterations, float3 *velocity, f
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
   cudaThreadSynchronize();
+  collision_check<<<blocks, NUM_THREADS>>>(position_next, velocity);
+  cudaThreadSynchronize();
 
   // Clear num_neighbors
   cudaMemset(neighbor_counts, 0, sizeof(int) * particleCount);
