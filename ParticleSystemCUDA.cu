@@ -211,7 +211,7 @@ __device__ float3 get_delta_pos(int particle_index, int *neighbor_counts, int *n
   return (1.0f / params.rest_density) * delta_pos;
 }
 
-__global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *position_next, float *density, float *lambda) {
+__global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
@@ -230,7 +230,6 @@ __global__ void get_lambda(int *neighbor_counts, int *neighbors, float3 *positio
     accum = accum + sp;
   }
 
-  density[particle_index] = density_i;
   float constraint_i = density_i / params.rest_density - 1.0f;
   ci_gradient += length2((1.0f / params.rest_density) * accum) + params.epsilon;
   lambda[particle_index] = -1.0f * (constraint_i / ci_gradient);
@@ -260,7 +259,7 @@ __global__ void apply_viscosity(float3 *velocity, float3 *position, float3 *posi
   position[particle_index] = position_next[particle_index];
 }
 
-void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda) {
+void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *lambda) {
   int blocks = (particleCount + NUM_THREADS - 1) / NUM_THREADS;
 
   apply_forces<<<blocks, NUM_THREADS>>>(velocity, position_next, position);
@@ -274,7 +273,7 @@ void update(int gridSize, int particleCount, int iterations, float3 *velocity, f
   find_neighbors(particleCount, grid_counts, grid, neighbor_counts, neighbors, position_next);
 
   for (int iter = 0; iter < iterations; iter++) {
-    get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, density, lambda);
+    get_lambda<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
     cudaThreadSynchronize();
     apply_pressure<<<blocks, NUM_THREADS>>>(neighbor_counts, neighbors, position_next, lambda);
     cudaThreadSynchronize();

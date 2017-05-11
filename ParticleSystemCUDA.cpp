@@ -5,7 +5,7 @@
 #include "ParticleSystemCUDA.h"
 #include <random>
 
-void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda);
+void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *lambda);
 void initialize(struct systemParams *p);
 
 #define cudaCheck(x) { cudaError_t err = x; if (err != cudaSuccess) { printf("Cuda error: %d in %s at %s:%d\n", err, #x, __FILE__, __LINE__); assert(0); } }
@@ -47,7 +47,6 @@ ParticleSystem(numParticles, bounds_max)
     cudaCheck(cudaMalloc((void **)&particlePos, numParticles * sizeof(float3)));
     cudaCheck(cudaMalloc((void **)&particleVel, numParticles * sizeof(float3)));
     cudaCheck(cudaMalloc((void **)&particlePosNext, numParticles * sizeof(float3)));
-    cudaCheck(cudaMalloc((void **)&particleDensity, numParticles * sizeof(float)));
     cudaCheck(cudaMalloc((void **)&particleLambda, numParticles * sizeof(float)));
     cudaCheck(cudaMalloc((void **)&neighborCounts, numParticles * sizeof(int)));
     cudaCheck(cudaMalloc((void **)&neighbors, numParticles * maxNeighbors * sizeof(int)));
@@ -57,7 +56,6 @@ ParticleSystem(numParticles, bounds_max)
     cudaCheck(cudaMemset(particlePos, 0, numParticles * sizeof(float3)));
     cudaCheck(cudaMemset(particleVel, 0, numParticles * sizeof(float3)));
     cudaCheck(cudaMemset(particlePosNext, 0, numParticles * sizeof(float3)));
-    cudaCheck(cudaMemset(particleDensity, 0, numParticles * sizeof(float)));
     cudaCheck(cudaMemset(particleLambda, 0, numParticles * sizeof(float)));
     cudaCheck(cudaMemset(neighborCounts, 0, numParticles * sizeof(int)));
     cudaCheck(cudaMemset(neighbors, 0, numParticles * maxNeighbors * sizeof(int)));
@@ -73,7 +71,6 @@ ParticleSystemCUDA::~ParticleSystemCUDA() {
     cudaCheck(cudaFree(particlePos));
     cudaCheck(cudaFree(particleVel));
     cudaCheck(cudaFree(particlePosNext));
-    cudaCheck(cudaFree(particleDensity));
     cudaCheck(cudaFree(particleLambda));
     cudaCheck(cudaFree(neighborCounts));
     cudaCheck(cudaFree(neighbors));
@@ -94,7 +91,7 @@ float* ParticleSystemCUDA::getParticlePos() {
 }
 
 void ParticleSystemCUDA::step() {
-    update(gridSize, numParticles, iterations, particleVel, particlePosNext, particlePos, neighborCounts, neighbors, gridCount, grid, particleDensity, particleLambda);
+    update(gridSize, numParticles, iterations, particleVel, particlePosNext, particlePos, neighborCounts, neighbors, gridCount, grid, particleLambda);
     cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
 }
 

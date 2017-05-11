@@ -49,7 +49,6 @@ private:
     float3* particlePos;
     float3* particlePosNext;
     float3* particleVel;
-    float* particleDensity;
     float* particleLambda;
     float3* hostParticlePos;
     int* neighborCounts;
