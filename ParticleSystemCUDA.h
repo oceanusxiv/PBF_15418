@@ -56,6 +56,7 @@ private:
     int* neighbors;
     int* gridCount;
     int* grid;
+    int gridSize;
 };
 
 #endif //PBF_15418_PARTICLESYSTEMCUDA_H

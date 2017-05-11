@@ -20,7 +20,7 @@ camera	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^   
 collision_check	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.cpp	/^void ParticleSystemSerial::collision_check(Particle *i) {$/;"	f	language:C++	class:ParticleSystemSerial
 collision_check	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    void collision_check(Particle *i);$/;"	p	language:C++	class:ParticleSystemSerial
 cubeMapTexture	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^    GLuint particleVAO, particleVBO, skyBoxVAO, skyBoxVBO, cubeMapTexture, quadVAO, quadVBO,$/;"	m	language:C++	class:glRenderer
-cudaCheck	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	10;"	d	language:C++	file:
+cudaCheck	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	11;"	d	language:C++	file:
 delta_q	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double delta_q = 0.2*h;$/;"	m	language:C++	class:ParticleSystem
 delta_q	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float delta_q;$/;"	m	language:C++	struct:systemParams
 depthPass	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::depthPass(glm::mat4 projection, GLuint FBO, GLuint textureOut) {$/;"	f	language:C++	class:glRenderer
@@ -57,6 +57,7 @@ gravity	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	
 gravity	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3 gravity;$/;"	m	language:C++	struct:systemParams
 grid	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int* grid;$/;"	m	language:C++	class:ParticleSystemCUDA
 gridCount	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int* gridCount;$/;"	m	language:C++	class:ParticleSystemCUDA
+gridSize	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int gridSize;$/;"	m	language:C++	class:ParticleSystemCUDA
 gridX	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int gridX;$/;"	m	language:C++	struct:systemParams
 gridY	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int gridY;$/;"	m	language:C++	struct:systemParams
 gridZ	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int gridZ;$/;"	m	language:C++	struct:systemParams
@@ -68,6 +69,7 @@ hostParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleS
 imax	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    size_t imax,jmax,kmax;$/;"	m	language:C++	class:ParticleSystemSerial
 init	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^int glRenderer::init() {$/;"	f	language:C++	class:glRenderer
 init	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^    int init();$/;"	p	language:C++	class:glRenderer
+initialize	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^void initialize(struct systemParams *p);$/;"	p	language:C++	file:
 iterations	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const int iterations = 10;$/;"	m	language:C++	class:ParticleSystem
 iterations	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int iterations;$/;"	m	language:C++	struct:systemParams
 jmax	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    size_t imax,jmax,kmax;$/;"	m	language:C++	class:ParticleSystemSerial
@@ -157,7 +159,7 @@ textureOne	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/
 textureTwo	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^            firstFBO, secondFBO, thicknessTexture, textureOne, textureTwo;$/;"	m	language:C++	class:glRenderer
 thicknessPass	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^    void thicknessPass(glm::mat4 projection, GLuint FBO, GLuint textureOut);$/;"	p	language:C++	class:glRenderer
 thicknessTexture	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^            firstFBO, secondFBO, thicknessTexture, textureOne, textureTwo;$/;"	m	language:C++	class:glRenderer
-update	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^void update(int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda);$/;"	p	language:C++	file:
+update	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.cpp	/^void update(int gridSize, int particleCount, int iterations, float3 *velocity, float3 *position_next, float3 *position, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid, float *density, float *lambda);$/;"	p	language:C++	file:
 updateBuffer	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^void glRenderer::updateBuffer() {$/;"	f	language:C++	class:glRenderer
 updateBuffer	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^    void updateBuffer();$/;"	p	language:C++	class:glRenderer
 width	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.h	/^    int width, height;$/;"	m	language:C++	class:glRenderer
