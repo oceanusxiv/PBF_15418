@@ -51,7 +51,9 @@ gridX	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.
 gridY	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int gridY;$/;"	m	language:C++	struct:systemParams
 gridZ	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int gridZ;$/;"	m	language:C++	struct:systemParams
 h	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const double h = 1.5;$/;"	m	language:C++	class:ParticleSystem
+h	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    int h;$/;"	m	language:C++	struct:systemParams
 hashMap	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^typedef std::unordered_multimap<std::tuple<size_t, size_t, size_t>, Particle *, decltype(keyHash), decltype(keyEqual)> hashMap;$/;"	t	language:C++
+hostParticlePos	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemCUDA.h	/^    float3* hostParticlePos;$/;"	m	language:C++	class:ParticleSystemCUDA
 imax	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystemSerial.h	/^    size_t imax,jmax,kmax;$/;"	m	language:C++	class:ParticleSystemSerial
 init	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/glRenderer.cpp	/^int glRenderer::init() {$/;"	f	language:C++	class:glRenderer
 iterations	/afs/andrew.cmu.edu/usr8/efang/private/15418/PBF_15418/ParticleSystem.h	/^    const int iterations = 10;$/;"	m	language:C++	class:ParticleSystem

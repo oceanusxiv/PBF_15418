@@ -33,7 +33,7 @@ ParticleSystem(numParticles, bounds_max)
     float thickness = 0.1;
     std::default_random_engine generator;
     std::uniform_real_distribution<float> distribution(bounds_min.x+5,bounds_max.x-5);
-    hostParticlePos = malloc(numParticles * sizeof(float3));
+    hostParticlePos = (float3 *)malloc(numParticles * sizeof(float3));
     for (int i = 0; i < numParticles; i++) {
         hostParticlePos[i] = make_float3(distribution(generator), distribution(generator), distribution(generator));
     }   
