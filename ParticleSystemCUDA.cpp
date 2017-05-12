@@ -116,14 +116,14 @@ ParticleSystemCUDA::~ParticleSystemCUDA() {
 }
 
 float* ParticleSystemCUDA::getParticlePos() {
-    //cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
-    //for (int i = 0; i < numParticles; i++) {
-    //    float3 p = hostParticlePos[i];
-    //    if (p.x < bounds_min.x || p.y < bounds_min.y || p.z < bounds_min.z || p.x > bounds_max.x || p.y > bounds_max.y || p.z > bounds_max.z) {
-    //        std::cout << "particle out of bounds!" << p.x << ", " << p.y << ", " << p.z << std::endl;
-    //    }
-    //}
+    #ifdef DEVICE_RENDER
+    return (float *)particlePos;
+
+    #else
+    cudaCheck(cudaMemcpy(hostParticlePos, particlePos, numParticles * sizeof(float3), cudaMemcpyDeviceToHost));
     return &hostParticlePos[0].x;
+
+    #endif /* DEVICE_RENDER */
 }
 
 void ParticleSystemCUDA::step() {

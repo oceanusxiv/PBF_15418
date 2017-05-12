@@ -11,6 +11,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 
 #define EPSILON 0.0000000001f
 #define NUM_THREADS 256
+#define APPLY_FORCES_THREADS 1024
 __constant__ struct systemParams params;
 
 /**
@@ -103,12 +104,53 @@ inline __device__ int pos_to_cell_idx(float3 pos) {
 /** End of helpers **/
 
 __global__ void apply_forces(float3 *velocity, float3 *position_next, float3 *position) {
+  __shared__ float3 shared_velocity[APPLY_FORCES_THREADS];
+  __shared__ float3 shared_position_next[APPLY_FORCES_THREADS];
+  __shared__ float3 shared_position[APPLY_FORCES_THREADS];
+
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
+  shared_velocity[threadIdx.x] = velocity[particle_index];
+  shared_position_next[threadIdx.x] = position_next[particle_index];
+  shared_position[threadIdx.x] = position[particle_index];
+
+  __syncthreads();
+
   float3 v = params.dt * params.gravity;
-  velocity[particle_index] = velocity[particle_index] + v;
-  position_next[particle_index] = position[particle_index] + params.dt * velocity[particle_index];
+  shared_velocity[threadIdx.x] = shared_velocity[threadIdx.x] + v;
+  shared_position_next[threadIdx.x] = shared_position[threadIdx.x] + params.dt * shared_velocity[threadIdx.x];
+
+  // Perform collision check
+  float3 n = shared_position_next[threadIdx.x];
+  if (n.x < params.bounds_min.x) {
+    shared_position_next[threadIdx.x].x = params.bounds_min.x + params.dist_from_bound;
+    shared_velocity[threadIdx.x].x = 0;
+  }
+  if (n.x > params.bounds_max.x) {
+    shared_position_next[threadIdx.x].x = params.bounds_max.x - params.dist_from_bound;
+    shared_velocity[threadIdx.x].x = 0;
+  }
+  if (n.y < params.bounds_min.y) {
+    shared_position_next[threadIdx.x].y = params.bounds_min.y + params.dist_from_bound;
+    shared_velocity[threadIdx.x].y = 0;
+  }
+  if (n.y > params.bounds_max.y) {
+    shared_position_next[threadIdx.x].y = params.bounds_max.y - params.dist_from_bound;
+    shared_velocity[threadIdx.x].y = 0;
+  }
+  if (n.z < params.bounds_min.z) {
+    shared_position_next[threadIdx.x].z = params.bounds_min.z + params.dist_from_bound;
+    shared_velocity[threadIdx.x].z = 0;
+  }
+  if (n.z > params.bounds_max.z) {
+    shared_position_next[threadIdx.x].z = params.bounds_max.z - params.dist_from_bound;
+    shared_velocity[threadIdx.x].z = 0;
+  }
+
+  velocity[particle_index] = shared_velocity[threadIdx.x];
+  position_next[particle_index] = shared_position_next[threadIdx.x];
+  position[particle_index] = shared_position[threadIdx.x];
 }
 
 __global__ void neighbor_kernel(float3 *position_next, int *neighbor_counts, int *neighbors, int *grid_counts, int *grid) {

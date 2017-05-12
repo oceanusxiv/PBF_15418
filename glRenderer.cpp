@@ -220,6 +220,11 @@ void glRenderer::setupParticles() {
     glGenBuffers(1, &particleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
 
+    #ifdef DEVICE_RENDER
+    glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, 0, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    cudaGraphicsGLRegisterBuffer(resources, particleVBO, cudaGraphicsRegisterFlagsNone);
+    #else
     glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, simulation.getParticlePos(), GL_STREAM_DRAW);
 
     glGenVertexArrays(1, &particleVAO);
@@ -230,12 +235,29 @@ void glRenderer::setupParticles() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    #endif /* DEVICE_RENDER */
 }
 
 void glRenderer::updateBuffer() {
 
+    //Update the VBO
+    #ifdef DEVICE_RENDER
+    void* particlePosPtr;
+    cudaCheck(cudaGraphicsMapResources(1, resources));
+    size_t size;
+
+    cudaGraphicsResourceGetMappedPointer(&particlePosPtr, &size, resources[0]);
+    float *pos = simulation.getParticlePos();
+    cudaCheck(cudaMemcpy(particlePosPtr, pos, simulation.getParticleNum() * sizeof(float) * 3, cudaMemcpyDeviceToDevice));
+
+    cudaGraphicsUnmapResources(1, resources);
+
+    #else
+
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, simulation.getParticleNum() * sizeof(float) * 3, simulation.getParticlePos());
+
+    #endif /* DEVICE_RENDER */
 
 }
 
@@ -297,6 +319,11 @@ void glRenderer::shadingPass(glm::mat4 projection, GLuint textureIn) {
 }
 
 glRenderer::~glRenderer() {
+    #ifdef DEVICE_RENDER
+    cudaDeviceSynchronize();
+    cudaGraphicsUnregisterResource(*resources);
+    #endif /* DEVICE_RENDER */
+    
     glDeleteVertexArrays(1, &particleVAO);
     glDeleteVertexArrays(1, &skyBoxVAO);
     glDeleteBuffers(1, &particleVBO);
