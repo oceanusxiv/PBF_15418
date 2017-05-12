@@ -222,9 +222,18 @@ void glRenderer::setupParticles() {
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
 
     #ifdef DEVICE_RENDER
-    glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, 0, GL_STREAM_DRAW);
+
+    glGenVertexArrays(1, &particleVAO);
+    glBindVertexArray(particleVAO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    cudaGraphicsGLRegisterBuffer(resources, particleVBO, cudaGraphicsRegisterFlagsNone);
+    glBindVertexArray(0);
+    
+    cudaGraphicsGLRegisterBuffer(&resources, particleVBO, cudaGraphicsRegisterFlagsNone);
     #else
     glBufferData(GL_ARRAY_BUFFER, simulation.getParticleNum() * sizeof(float) * 3, simulation.getParticlePos(), GL_STREAM_DRAW);
 
@@ -244,14 +253,14 @@ void glRenderer::updateBuffer() {
     //Update the VBO
     #ifdef DEVICE_RENDER
     void* particlePosPtr;
-    cudaCheck(cudaGraphicsMapResources(1, resources));
+    cudaCheck(cudaGraphicsMapResources(1, &resources));
     size_t size;
 
-    cudaGraphicsResourceGetMappedPointer(&particlePosPtr, &size, resources[0]);
+    cudaGraphicsResourceGetMappedPointer(&particlePosPtr, &size, resources);
     float *pos = simulation.getParticlePos();
     cudaCheck(cudaMemcpy(particlePosPtr, pos, simulation.getParticleNum() * sizeof(float) * 3, cudaMemcpyDeviceToDevice));
 
-    cudaGraphicsUnmapResources(1, resources);
+    cudaGraphicsUnmapResources(1, &resources);
 
     #else
 
@@ -321,7 +330,7 @@ void glRenderer::shadingPass(glm::mat4 projection, GLuint textureIn) {
 glRenderer::~glRenderer() {
     #ifdef DEVICE_RENDER
     cudaDeviceSynchronize();
-    cudaGraphicsUnregisterResource(*resources);
+    cudaGraphicsUnregisterResource(resources);
     #endif /* DEVICE_RENDER */
 
     glDeleteVertexArrays(1, &particleVAO);

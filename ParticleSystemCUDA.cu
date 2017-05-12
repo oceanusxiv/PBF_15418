@@ -7,8 +7,9 @@
 
 #define EPSILON 0.0000000001f
 #define NUM_THREADS 256
-#define APPLY_FORCES_THREADS 1333
+#define APPLY_FORCES_THREADS 1024
 #define OFFSET_KERNEL_THREADS 1024
+#define MAX_SHARED_GRID_COUNTS 12000
 
 __constant__ struct systemParams params;
 
@@ -94,7 +95,7 @@ inline __device__ int pos_to_cell_idx(float3 pos) {
       pos.z <= params.bounds_min.z || pos.z >= params.bounds_max.z) {
     return -1;
   } else {
-    return ((int)floorf(pos.z / params.h) * params.gridY  + (int)floorf(pos.y / params.h)) * params.gridX + (int)floorf(pos.x / params.h);
+    return ((int)floorf(pos.x / params.h) * params.gridY  + (int)floorf(pos.y / params.h)) * params.gridZ + (int)floorf(pos.z / params.h);
   }
 }
 
@@ -247,46 +248,6 @@ __global__ void collision_check(float3 *position_next, float3 *velocity) {
   }
 }
 
-__device__ float3 get_delta_pos(int *grid_counts, int particle_index, int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
-  float w_dq = poly6(params.delta_q * make_vector(1.0f));
-  float3 delta_pos = make_vector(0.0f);
-
-  // int neighbor_count = neighbor_counts[particle_index];
-  for (int x = -1; x <= 1; x++) {
-    for (int y = -1; y <= 1; y++) {
-      for (int z = -1; z <= 1; z++) {
-        float3 p = position_next[particle_index];
-        int cell = pos_to_cell_idx(make_float3(p.x + x * params.h, p.y + y * params.h, p.z + z * params.h));
-        if (cell < 0) continue;
-        int neighbor_index = grid_counts[cell];
-        while (true) {
-          if (neighbor_index >= params.particleCount) break;
-          
-          if (neighbor_counts[neighbor_index] != cell) break;
-
-          if (neighbor_index != particle_index) {
-
-            float3 d = position_next[particle_index] - position_next[neighbor_index];
-
-            float kernel_ratio = poly6(d) / w_dq;
-            if (w_dq < EPSILON) {
-              kernel_ratio = 0.0f;
-            }
-
-            float scorr = -params.k * (kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio);
-            delta_pos = delta_pos + (lambda[particle_index] + lambda[neighbor_index] + scorr) * spiky_prime(d);
-
-          }
-
-          neighbor_index++;
-        }
-      }
-    }
-  }
-
-  return (1.0f / params.rest_density) * delta_pos;
-}
-
 __global__ void get_lambda(int *grid_counts, int *neighbor_counts, int *neighbors, float3 *position_next, float *lambda) {
 
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -337,7 +298,43 @@ __global__ void apply_pressure(int *grid_counts, int *neighbor_counts, int *neig
   int particle_index = blockIdx.x * blockDim.x + threadIdx.x;
   if (particle_index >= params.particleCount) return;
 
-  position_next[particle_index] = position_next[particle_index] + get_delta_pos(grid_counts, particle_index, neighbor_counts, neighbors, position_next, lambda);
+  float w_dq = poly6(params.delta_q * make_vector(1.0f));
+  float3 delta_pos = make_vector(0.0f);
+
+  // int neighbor_count = neighbor_counts[particle_index];
+  for (int x = -1; x <= 1; x++) {
+    for (int y = -1; y <= 1; y++) {
+      for (int z = -1; z <= 1; z++) {
+        float3 p = position_next[particle_index];
+        int cell = pos_to_cell_idx(make_float3(p.x + x * params.h, p.y + y * params.h, p.z + z * params.h));
+        if (cell < 0) continue;
+        int neighbor_index = grid_counts[cell];
+        while (true) {
+          if (neighbor_index >= params.particleCount) break;
+          
+          if (neighbor_counts[neighbor_index] != cell) break;
+
+          if (neighbor_index != particle_index) {
+
+            float3 d = position_next[particle_index] - position_next[neighbor_index];
+
+            float kernel_ratio = poly6(d) / w_dq;
+            if (w_dq < EPSILON) {
+              kernel_ratio = 0.0f;
+            }
+
+            float scorr = -params.k * (kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio * kernel_ratio);
+            delta_pos = delta_pos + (lambda[particle_index] + lambda[neighbor_index] + scorr) * spiky_prime(d);
+          }
+
+          neighbor_index++;
+        }
+      }
+    }
+  }
+
+  delta_pos = (1.0f / params.rest_density) * delta_pos;
+  position_next[particle_index] = position_next[particle_index] + delta_pos;
 }
 
 __global__ void apply_viscosity(int *grid_counts, float3 *velocity, float3 *position, float3 *position_next, int *neighbor_counts, int *neighbors) {
@@ -347,7 +344,6 @@ __global__ void apply_viscosity(int *grid_counts, float3 *velocity, float3 *posi
   // Get the viscosity
   float3 viscosity = make_vector(0.0f);
 
-  // int neighbor_count = neighbor_counts[particle_index];
   for (int x = -1; x <= 1; x++) {
     for (int y = -1; y <= 1; y++) {
       for (int z = -1; z <= 1; z++) {
