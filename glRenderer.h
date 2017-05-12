@@ -32,7 +32,7 @@ public:
     int init();
     void onDraw();
     #ifdef DEVICE_RENDER
-    cudaGraphicsResource_t *resources;
+    cudaGraphicsResource *resources;
     #endif /* DEVICE_RENDER */
 
 private:

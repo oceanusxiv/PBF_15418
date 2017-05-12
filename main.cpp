@@ -1,6 +1,7 @@
 #include "glWindow.h"
 #include "glRenderer.h"
 #include "ParticleSystemCUDA.h"
+#include "ParticleSystemSerial.h"
 
 void printCudaInfo();
 
