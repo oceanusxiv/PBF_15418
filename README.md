@@ -17,7 +17,7 @@ We have managed to get our single threaded implementation to run on the GHC mach
 
 # Final Report
 
-https://docs.google.com/a/andrew.cmu.edu/document/d/1FSzlfT4GooNe6gLUb4NDqucE7JCbAO1ozPExPyuIMts/edit?usp=sharing
+https://docs.google.com/document/d/1FSzlfT4GooNe6gLUb4NDqucE7JCbAO1ozPExPyuIMts/edit?usp=sharing
 
 # Dependencies
 
