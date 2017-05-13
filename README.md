@@ -15,6 +15,10 @@ A sequential version of the fluid simulation will be built first to serve as the
 
 We have managed to get our single threaded implementation to run on the GHC machines. Additionally, we have fixed the build system to build with CUDA and demonstrated the ability to perform a test GPU computation in our program.
 
+# Final Report
+
+https://docs.google.com/a/andrew.cmu.edu/document/d/1FSzlfT4GooNe6gLUb4NDqucE7JCbAO1ozPExPyuIMts/edit?usp=sharing
+
 # Dependencies
 
  * OpenGL
