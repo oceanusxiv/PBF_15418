@@ -1,15 +1,20 @@
 #include "glWindow.h"
 #include "glRenderer.h"
+#include <gperftools/profiler.h>
+#ifdef __APPLE__
+#include "ParticleSystemSerial.h"
+#else
 #include "ParticleSystemCUDA.h"
+#endif
 
 void printCudaInfo();
 
 int main(int argc, char *argv[]) {
 
     int numParticles = 2000;
-    int width = 640;
-    int height = 480;
-    std::string srcPath = "./";
+    int width = 1280;
+    int height = 720;
+    std::string srcPath = "../";
     int boundX = 30;
     int boundY = 30;
     int boundZ = 30;
@@ -35,17 +40,21 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    #ifdef __APPLE__
+    ParticleSystemSerial sim(numParticles, glm::vec3(boundX, boundY, boundZ), config);
+    #else
     ParticleSystemCUDA sim(numParticles, glm::vec3(boundX, boundY, boundZ), config);
+    #endif
 
     glWindow simWindow(width, height);
     simWindow.init();
-
     glRenderer simRenderer(width, height, simWindow.getCamera(), sim, srcPath);
     simRenderer.init();
 
     double lastTime = glfwGetTime();
     int nbFrames = 0;
-
+    
+    ProfilerStart("pbf.prof");
     while(!glfwWindowShouldClose(simWindow.getWindow()))
     {
         double currentTime = glfwGetTime();
@@ -64,7 +73,7 @@ int main(int argc, char *argv[]) {
 
         glfwSwapBuffers(simWindow.getWindow());
     }
-
+    ProfilerStop();
     glfwTerminate();
     return 0;
 }

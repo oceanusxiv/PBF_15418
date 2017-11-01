@@ -13,3 +13,4 @@ Would skip repository lib/glfw/
 compile_commands.json
 build/
 tags
+.vscode

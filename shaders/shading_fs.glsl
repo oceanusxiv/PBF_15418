@@ -102,4 +102,6 @@ void main(){
     vec4 cubeMapReflect = texture(skybox, R) * (reflectance + (1.0f - reflectance) * pow(1.0f - dot(I, normal), 5));
 
     color = vec4(colorLinear, 1.f) * cubeMapReflect;
+    // float z = (2 * 0.1) / (100 + 0.1 - depth * (100 - 0.1));
+    // color = vec4(z, z, z, 1.f);
   }

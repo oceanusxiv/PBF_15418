@@ -14,15 +14,62 @@ neighborHash(5, keyHash, keyEqual)
     kmax = size_t(ceil((bounds_max.z-bounds_min.z)/h));
     float thickness = 0.01;
     std::default_random_engine generator;
-    std::uniform_real_distribution<float> distribution(bounds_min.x+5,bounds_max.x-5);
+    particlePos.resize(numParticles);
+    particles.resize(numParticles);
 
-    for(int i = 0; i < numParticles; i++) {
-        particles.push_back(new Particle(
-                glm::vec3(distribution(generator), distribution(generator), distribution(generator)), maxNeighbors));
+    if (config == "dam") {
+        std::uniform_real_distribution<float> distributionX(bounds_min.x + 0.1, bounds_min.x + 40);
+        std::uniform_real_distribution<float> distributionY(bounds_min.y + 0.1, bounds_max.y - 0.1);
+        std::uniform_real_distribution<float> distributionZ(bounds_min.z + 40, bounds_max.z - 0.1);
+        for (int i = 0; i < numParticles; i++) {
+            if (i % 2) {
+                particles[i] = new Particle(
+                        glm::vec3(
+                        distributionX(generator), 
+                        distributionY(generator), 
+                        distributionZ(generator)),
+                        maxNeighbors);
+            } else {
+                particles[i] = new Particle(
+                    glm::vec3(
+                    distributionZ(generator), 
+                    distributionY(generator), 
+                    distributionX(generator)),
+                    maxNeighbors);
+            }
+
+            particlePos[i] = particles[i]->x;
+        } 
     }
+    else if (config == "sphere") {
+        float r = std::min(std::min(bounds_max.x - bounds_min.x, bounds_max.y - bounds_min.y), bounds_max.z - bounds_min.z)/2.0;
+        glm::vec3 offset = glm::vec3((bounds_max.x - bounds_min.x)/2.0, (bounds_max.y - bounds_min.y)/2.0, (bounds_max.z - bounds_min.z)/2.0);
+        std::uniform_real_distribution<float> distributionR(-r, r);
+        float x, y, z;
+        for (int i = 0; i < numParticles; i++) {
+            do {
+                x = distributionR(generator);
+                y = distributionR(generator);
+                z = distributionR(generator);
+            } while (x*x + y*y + z*z >= r*r);
+            
+            particles[i] = new Particle(glm::vec3(x, y, z) + offset, maxNeighbors);
+            particlePos[i] = particles[i]->x;
+        } 
+    }
+    else {
 
-    for (auto p: particles) {
-        particlePos.push_back(p->x);
+        std::uniform_real_distribution<float> distribution(bounds_min.x+5, bounds_max.x-5);
+    
+        for(int i = 0; i < numParticles; i++) {
+            particles[i] = new Particle(
+                glm::vec3(
+                distribution(generator), 
+                distribution(generator), 
+                distribution(generator)), 
+                maxNeighbors);
+            particlePos[i] = particles[i]->x;
+        }
     }
 
     std::cout << particles.size() << " particles generated!" << std::endl;
@@ -57,21 +104,25 @@ glm::vec3 ParticleSystemSerial::spiky_prime(glm::vec3 r) {
 
 void ParticleSystemSerial::apply_forces() {
 
-    for (auto i : particles) {
-        i->v += dt*gravity;
-        i->x_next = i->x + dt*i->v;
-        i->boundary = false;
+    for(int i = 0; i < numParticles; i++) {
+        auto p = particles[i];
+        p->v += dt*gravity;
+        p->x_next = p->x + dt*p->v;
+        p->boundary = false;
     }
 
 }
 
 void ParticleSystemSerial::find_neighbors() {
     neighborHash.clear();
+
     for (auto p : particles) {
         neighborHash.emplace(std::make_tuple(floor(p->x_next.x/h), floor(p->x_next.y/h), floor(p->x_next.z/h)), p);
     }
 
-    for (auto p : particles) {
+    #pragma omp parallel for
+    for (int i = 0; i < numParticles; i++) {
+        auto p = particles[i];
         p->neighbors.clear();
         glm::vec3 BB_min = p->x_next - glm::vec3(h, h, h);
         glm::vec3 BB_max = p->x_next + glm::vec3(h, h, h);
@@ -92,6 +143,28 @@ void ParticleSystemSerial::find_neighbors() {
             }
         }
     }
+
+    // for (auto p : particles) {
+    //     p->neighbors.clear();
+    //     glm::vec3 BB_min = p->x_next - glm::vec3(h, h, h);
+    //     glm::vec3 BB_max = p->x_next + glm::vec3(h, h, h);
+    //     for (double x=BB_min.x; x<=BB_max.x; x+=h) {
+    //         for (double y=BB_min.y; y<=BB_max.y; y+=h) {
+    //             for (double z=BB_min.z; z<=BB_max.z; z+=h) {
+    //                 //std::cout << x<<y<<z<<std::endl;
+    //                 auto range = neighborHash.equal_range(std::make_tuple(floor(x/h), floor(y/h), floor(z/h)));
+    //                 if (range.first==range.second) { continue;}
+    //                 for(auto it=range.first; it != range.second; ++it) {
+    //                     Particle *j = it->second;
+    //                     if (j != p) {
+    //                         double length = glm::l2Norm(p->x_next,j->x_next);
+    //                         if (length < h) {p->neighbors.push_back(j);}
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 double ParticleSystemSerial::calc_cell_density(size_t i, size_t j, size_t k, glm::vec3 grid_vertex) {
@@ -124,6 +197,7 @@ double ParticleSystemSerial::calc_scalar(size_t i, size_t j, size_t k) {
 }
 
 void ParticleSystemSerial::get_lambda() {
+
     for (auto i : particles) {
         //if (i->boundary) {continue;}
         double density_i = 0.0f;
@@ -203,6 +277,7 @@ void ParticleSystemSerial::collision_check(Particle *i) {
 }
 
 void ParticleSystemSerial::apply_pressure() {
+  
     for (auto i : particles) {
         glm::vec3 dp = get_delta_pos(i);
         i->x_next+=dp;
@@ -212,6 +287,7 @@ void ParticleSystemSerial::apply_pressure() {
 
 glm::vec3 ParticleSystemSerial::get_viscosity(Particle *i) {
     glm::vec3 visc = glm::vec3(0.0f);
+
     for (auto j : i->neighbors) {
         visc+=(i->v-j->v)*poly6(i->x-j->x);
     }
@@ -228,6 +304,7 @@ void ParticleSystemSerial::step() {
         get_lambda();
         apply_pressure();
     }
+
     for (auto i : particles) {
         i->v = (1.0f/dt)*(i->x_next-i->x);
         i->v+=get_viscosity(i);
