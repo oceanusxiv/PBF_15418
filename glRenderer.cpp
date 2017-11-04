@@ -59,8 +59,9 @@ void glRenderer::onDraw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
 
-  glm::mat4 projection =
-      glm::perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.f);
+  glm::mat4 projection = glm::perspective(
+      camera.Zoom, static_cast<float>(width) / static_cast<float>(height), 0.1f,
+      1000.f);
 
   updateBuffer();
 
@@ -80,8 +81,7 @@ void glRenderer::setupSkyBox() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), &skyBoxVertices,
                GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
-                        (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
@@ -143,14 +143,13 @@ void glRenderer::blurPass(glm::mat4 projection, GLuint FBO, GLuint textureIn,
 void glRenderer::setupQuad() {
   glGenBuffers(1, &quadVBO);
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices,
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices),
+               static_cast<const GLvoid*>(quadVertices), GL_STATIC_DRAW);
 
   glGenVertexArrays(1, &quadVAO);
   glBindVertexArray(quadVAO);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
-                        (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
   glEnableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -177,7 +176,7 @@ GLuint glRenderer::setupFBO(GLuint texture) {
 
 GLuint glRenderer::setupTexture() {
   GLint dims[4] = {0};
-  glGetIntegerv(GL_VIEWPORT, dims);
+  glGetIntegerv(GL_VIEWPORT, static_cast<GLint*>(dims));
   GLint fbWidth = dims[2];
   GLint fbHeight = dims[3];
 
@@ -187,7 +186,7 @@ GLuint glRenderer::setupTexture() {
 
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, fbWidth, fbHeight, 0,
-               GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+               GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -217,8 +216,7 @@ void glRenderer::setupParticles() {
   glGenVertexArrays(1, &particleVAO);
   glBindVertexArray(particleVAO);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
-                        (GLvoid*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
   glEnableVertexAttribArray(0);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
