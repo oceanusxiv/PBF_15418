@@ -20,7 +20,5 @@ before_install:
 
 script:
   - pwd
-  - mkdir build
-  - cd build
   - cmake ..
   - make
