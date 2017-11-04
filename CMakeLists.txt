@@ -1,72 +1,118 @@
-cmake_minimum_required(VERSION 3.2)
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_C_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang)
-set(CMAKE_CXX_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang++)
-set(CMAKE_CXX_STANDARD 11)
+cmake_minimum_required(VERSION 3.9)
+if (APPLE)
+  set(CMAKE_C_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang)
+  set(CMAKE_CXX_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang++)
+endif()
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Ofast")
+# if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+#     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_pie")
+# endif()
 project(PBF_15418)
+option(CUDA "enable CUDA in compilation" OFF)
 
-#find_package(glfw3 3.2 REQUIRED)
+find_program(
+  CLANG_TIDY_EXE
+  NAMES "clang-tidy"
+  HINTS "/usr/local/Cellar/llvm/5.0.0/bin"
+  )
+if(NOT CLANG_TIDY_EXE)
+  message(STATUS "clang-tidy not found.")
+else()
+  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+  set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*")
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
+if (CUDA)
+  enable_language(CUDA)
+endif()
+
+find_package(GLFW3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(PkgConfig)
-find_package(Gperftools)
-if (!APPLE)
-find_package(CUDA REQUIRED)
-endif (!APPLE)
-
-pkg_search_module(GLFW REQUIRED glfw3)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
-SET(GCC_COVERAGE_COMPILE_FLAGS "-fopenmp -Ofast")
-SET(GCC_COVERAGE_LINK_FLAGS    "-Wl,-no_pie")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
-
-if(APPLE)
-    INCLUDE_DIRECTORIES ( /System/Library/Frameworks )
-    FIND_LIBRARY(COCOA_LIBRARY Cocoa)
-    MARK_AS_ADVANCED (COCOA_LIBRARY)
-    SET(EXTRA_LIBS ${COCOA_LIBRARY})
-else(APPLE)
-    include_directories(/afs/andrew.cmu.edu/usr8/efang/public/glm/)
-endif (APPLE)
-
-include_directories(${GLFW_INCLUDE_DIRS})
-include_directories(${GLEW_INCLUDE_DIRS})
-include_directories(${OPENGL_INCLUDE_DIR})
-include_directories(${Gperftools_INCLUDE_DIRS})
-if (!APPLE)
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61 -std=c++11)
-endif (!APPLE)
-#set(CUDA_LIBRARY saxpy)
-#set(CUDA_SOURCES saxpy.cu)
-#cuda_add_library(${CUDA_LIBRARY} ${CUDA_SOURCES})
+find_package(glm REQUIRED)
+# find_package(Gperftools REQUIRED)
 
 if (APPLE)
-    set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h ParticleSystemSerial.cpp
-        ParticleSystemSerial.h ParticleSystem.h Camera.h SOIL2.h Particle.h)
-    add_executable(PBF_15418 ${SOURCE_FILES})
-else (APPLE)
-    set(SOURCE_FILES main.cpp glWindow.cpp glWindow.h shader.h glRenderer.cpp glRenderer.h ParticleSystemSerial.cpp
-        ParticleSystemSerial.h ParticleSystem.h Camera.h SOIL2.h Particle.h ParticleSystemCUDA.h ParticleSystemCUDA.cpp)
-    cuda_add_executable(PBF_15418 ${SOURCE_FILES} ParticleSystemCUDA.cu)
-endif (APPLE)
+  find_library(COCOA_LIBRARY Cocoa REQUIRED)
+endif()
+
+if (CUDA)
+  add_executable(PBF_15418
+                main.cpp 
+                config.h
+                glWindow.cpp 
+                glWindow.h 
+                shader.h 
+                glRenderer.cpp 
+                glRenderer.h 
+                ParticleSystemSerial.cpp
+                ParticleSystemSerial.h 
+                ParticleSystem.h 
+                Camera.h 
+                SOIL2.h 
+                Particle.h 
+                ParticleSystemCUDA.h 
+                ParticleSystemCUDA.cpp
+                ParticleSystemCUDA.cu)
+  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61 -std=c++11)
+else()
+  add_executable(PBF_15418
+                main.cpp 
+                config.h
+                glWindow.cpp 
+                glWindow.h 
+                shader.h 
+                glRenderer.cpp 
+                glRenderer.h 
+                ParticleSystemSerial.cpp
+                ParticleSystemSerial.h 
+                ParticleSystem.h 
+                Camera.h 
+                SOIL2.h 
+                Particle.h)
+endif ()
+
+target_compile_features(PBF_15418 PUBLIC 
+  cxx_std_14)
+
+# target_compile_options(PBF_15418 PUBLIC
+#   -fopenmp 
+#   -Ofast
+# )
+
+# target_link_libraries(PBF_15418
+#   -fopenmp
+#   -Ofast
+# )
+
+if(CLANG_TIDY_EXE)
+  set_target_properties(
+    PBF_15418 PROPERTIES
+    CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+  )
+endif()
+
+target_include_directories(PBF_15418
+  PUBLIC
+  ${GLEW_INCLUDE_DIRS}
+  ${OPENGL_INCLUDE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR})
+  # ${Gperftools_INCLUDE_DIRS}
 
 if(APPLE)
-    target_link_libraries(PBF_15418 ${EXTRA_LIBS})
-    set(SOIL2_DIR ${CMAKE_SOURCE_DIR}/lib/libsoil2.a)
-else(APPLE)
-    set(SOIL2_DIR ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
-endif(APPLE)
+  target_link_libraries(PBF_15418 
+  ${COCOA_LIBRARY}
+  ${CMAKE_SOURCE_DIR}/lib/libsoil2.a)
+else()
+  target_link_libraries(PBF_15418 
+  ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
+endif()
 
 target_link_libraries(PBF_15418 
-${CUDA_LIBRARIES} 
-${CUDA_LIBRARY} 
-${GLFW_LIBRARIES} 
-${GLEW_LIBRARIES} 
-${OPENGL_LIBRARIES} 
-${SOIL2_DIR}
-profiler)
+  glfw
+  ${GLEW_LIBRARIES} 
+  ${OPENGL_LIBRARIES})
+  # profiler)
