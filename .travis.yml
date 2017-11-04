@@ -15,7 +15,7 @@ addons:
 
 before_install:
 - sudo apt-get -qq update
-- sudo apt-get install -y libglm-dev libglew-dev
+- sudo apt-get install -y libglm-dev libglew-dev xorg-dev
 - git clone https://github.com/glfw/glfw && mkdir build && cd build && cmake ../glfw && make -j4 && sudo make install
 
 before_script:
