@@ -20,7 +20,7 @@ CUDA implementation of the Position Based Fluid System
 ## Result
 
 20000 Particles, double dam break
-![fluids!](http://github.com/eric1221bday/PBF_15418/blob/master/resource/20000.jpg)
+![fluids!](https://github.com/eric1221bday/PBF_15418/blob/master/resource/20000.png)
 
 ## Project Proposal
 
