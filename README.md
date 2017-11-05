@@ -17,9 +17,14 @@ CUDA implementation of the Position Based Fluid System
 ./PBF_15418 -n 20000 -b 70 70 70
 ```
 
+## Result
+
+20000 Particles, double dam break
+![fluids!](http://github.com/eric1221bday/PBF_15418/blob/master/resource/20000.jpg)
+
 ## Project Proposal
 
-This project aims to use CUDA to accelerate a position based fluid simulation system. Based on the original paper by [Macklin et. al.](http://mmacklin.com/pbf_sig_preprint.pdf), and using the screen space fluid rendering technique showcased by [Simon Green](http://developer.download.nvidia.com/presentations/2010/gdc/Direct3D_Effects.pdf). Below is the result of Macklin's implementation of the PBF system. 
+This project aims to use CUDA to accelerate a position based fluid simulation system. Based on the original paper by [Macklin et. al.](http://mmacklin.com/pbf_sig_preprint.pdf), and using the screen space fluid rendering technique showcased by [Simon Green](http://developer.download.nvidia.com/presentations/2010/gdc/Direct3D_Effects.pdf). Below is the result of Macklin's implementation of the PBF system.
 
 ![alt text](https://i.ytimg.com/vi/F5KuP6qEuew/maxresdefault.jpg)
 
