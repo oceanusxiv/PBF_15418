@@ -5,6 +5,7 @@
 #ifndef PBF_15418_PARTICLESYSTEMSERIAL_H
 #define PBF_15418_PARTICLESYSTEMSERIAL_H
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/ext.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>

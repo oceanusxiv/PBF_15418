@@ -1,10 +1,8 @@
 #include "config.h"
 #include "glRenderer.h"
 #include "glWindow.h"
-// FIXME: find a way to include this dynamically
-// #include <gperftools/profiler.h>
 #include "ParticleSystemSerial.h"
-#ifdef CUDA
+#ifdef USE_CUDA
 #include "ParticleSystemCUDA.h"
 #endif
 
@@ -12,8 +10,8 @@ void printCudaInfo();
 
 int main(int argc, char *argv[]) {
   int numParticles = 2000;
-  int width = 1280;
-  int height = 720;
+  int width = 2560;
+  int height = 1440;
   std::string srcPath = "../";
   int boundX = 30;
   int boundY = 30;
@@ -40,7 +38,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-#ifdef CUDA
+#ifdef USE_CUDA
   ParticleSystemCUDA sim(numParticles, glm::vec3(boundX, boundY, boundZ),
                          config);
 #else

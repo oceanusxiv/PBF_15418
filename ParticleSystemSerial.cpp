@@ -19,12 +19,12 @@ ParticleSystemSerial::ParticleSystemSerial(unsigned numParticles,
   particles.resize(numParticles);
 
   if (config == "dam") {
-    std::uniform_real_distribution<float> distributionX(bounds_min.x + 0.1,
-                                                        bounds_min.x + 40);
-    std::uniform_real_distribution<float> distributionY(bounds_min.y + 0.1,
-                                                        bounds_max.y - 0.1);
-    std::uniform_real_distribution<float> distributionZ(bounds_min.z + 40,
-                                                        bounds_max.z - 0.1);
+    std::uniform_real_distribution<float> distributionX(bounds_min.x + 0.1f,
+                                                        bounds_min.x + bounds_max.x * 0.9f);
+    std::uniform_real_distribution<float> distributionY(bounds_min.y + 0.1f,
+                                                        bounds_max.y - 0.1f);
+    std::uniform_real_distribution<float> distributionZ(bounds_min.z + bounds_max.z * 0.9f,
+                                                        bounds_max.z - 0.1f);
     for (int i = 0; i < numParticles; i++) {
       if (i % 2) {
         particles[i] = new Particle(
@@ -44,7 +44,7 @@ ParticleSystemSerial::ParticleSystemSerial(unsigned numParticles,
     float r = std::min(std::min(bounds_max.x - bounds_min.x,
                                 bounds_max.y - bounds_min.y),
                        bounds_max.z - bounds_min.z) /
-              2.0;
+        2.0;
     glm::vec3 offset = glm::vec3((bounds_max.x - bounds_min.x) / 2.0,
                                  (bounds_max.y - bounds_min.y) / 2.0,
                                  (bounds_max.z - bounds_min.z) / 2.0);
@@ -109,7 +109,7 @@ glm::vec3 ParticleSystemSerial::spiky_prime(glm::vec3 r) {
 
 void ParticleSystemSerial::apply_forces() {
   for (int i = 0; i < numParticles; i++) {
-    auto p = particles[i];
+    auto &p = particles[i];
     p->v += dt * gravity;
     p->x_next = p->x + dt * p->v;
     p->boundary = false;
@@ -119,23 +119,21 @@ void ParticleSystemSerial::apply_forces() {
 void ParticleSystemSerial::find_neighbors() {
   neighborHash.clear();
 
-  for (auto p : particles) {
+  for (auto &p : particles) {
     neighborHash.emplace(
         std::make_tuple(floor(p->x_next.x / h), floor(p->x_next.y / h),
                         floor(p->x_next.z / h)),
         p);
   }
 
-#pragma omp parallel for
   for (int i = 0; i < numParticles; i++) {
-    auto p = particles[i];
+    auto &p = particles[i];
     p->neighbors.clear();
     glm::vec3 BB_min = p->x_next - glm::vec3(h, h, h);
     glm::vec3 BB_max = p->x_next + glm::vec3(h, h, h);
     for (double x = BB_min.x; x <= BB_max.x; x += h) {
       for (double y = BB_min.y; y <= BB_max.y; y += h) {
         for (double z = BB_min.z; z <= BB_max.z; z += h) {
-          // std::cout << x<<y<<z<<std::endl;
           auto range = neighborHash.equal_range(
               std::make_tuple(floor(x / h), floor(y / h), floor(z / h)));
           if (range.first == range.second) {
@@ -154,30 +152,6 @@ void ParticleSystemSerial::find_neighbors() {
       }
     }
   }
-
-  // for (auto p : particles) {
-  //     p->neighbors.clear();
-  //     glm::vec3 BB_min = p->x_next - glm::vec3(h, h, h);
-  //     glm::vec3 BB_max = p->x_next + glm::vec3(h, h, h);
-  //     for (double x=BB_min.x; x<=BB_max.x; x+=h) {
-  //         for (double y=BB_min.y; y<=BB_max.y; y+=h) {
-  //             for (double z=BB_min.z; z<=BB_max.z; z+=h) {
-  //                 //std::cout << x<<y<<z<<std::endl;
-  //                 auto range =
-  //                 neighborHash.equal_range(std::make_tuple(floor(x/h),
-  //                 floor(y/h), floor(z/h))); if (range.first==range.second) {
-  //                 continue;} for(auto it=range.first; it != range.second;
-  //                 ++it) {
-  //                     Particle *j = it->second;
-  //                     if (j != p) {
-  //                         double length = glm::l2Norm(p->x_next,j->x_next);
-  //                         if (length < h) {p->neighbors.push_back(j);}
-  //                     }
-  //                 }
-  //             }
-  //         }
-  //     }
-  // }
 }
 
 double ParticleSystemSerial::calc_cell_density(size_t i, size_t j, size_t k,
@@ -229,7 +203,7 @@ void ParticleSystemSerial::get_lambda() {
           std::cout << glm::l2Norm(i->x_next,j->x_next) << std::endl;
       }*/
       ci_gradient += glm::length2(-1.0f / rest_density *
-                                  spiky_prime(i->x_next - j->x_next));
+          spiky_prime(i->x_next - j->x_next));
     }
     glm::vec3 accum = glm::vec3(0.0f);
     for (auto j : i->neighbors) {
@@ -255,7 +229,7 @@ glm::vec3 ParticleSystemSerial::get_delta_pos(Particle *i) {
       kernel_ratio = 0.0f;
     }
     double scorr = -k * (kernel_ratio * kernel_ratio * kernel_ratio *
-                         kernel_ratio * kernel_ratio * kernel_ratio);
+        kernel_ratio * kernel_ratio * kernel_ratio);
     // std::cout << kernel_ratio<< std::endl;
     delta_pos +=
         (i->lambda + j->lambda + scorr) * spiky_prime(i->x_next - j->x_next);
@@ -325,7 +299,7 @@ void ParticleSystemSerial::step() {
     apply_pressure();
   }
 
-  for (auto i : particles) {
+  for (auto &i : particles) {
     i->v = (1.0f / dt) * (i->x_next - i->x);
     i->v += get_viscosity(i);
     i->x = i->x_next;

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-#include <GL/glew.h>
+#include <gl/glew.h>
 
 class Shader {
  public:

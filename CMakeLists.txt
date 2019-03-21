@@ -1,118 +1,91 @@
 cmake_minimum_required(VERSION 3.9)
 if (APPLE)
-  set(CMAKE_C_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang)
-  set(CMAKE_CXX_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang++)
-endif()
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Ofast")
-# if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
-#     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_pie")
-# endif()
-project(PBF_15418)
-option(CUDA "enable CUDA in compilation" OFF)
+    set(CMAKE_C_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang)
+    set(CMAKE_CXX_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang++)
+elseif (MSVC)
+    set(CMAKE_TOOLCHAIN_FILE:PATH C:Utilities/vcpkg/scripts/buildsystems/vcpkg.cmake)
+endif ()
 
-find_program(
-  CLANG_TIDY_EXE
-  NAMES "clang-tidy"
-  HINTS "/usr/local/Cellar/llvm/5.0.0/bin"
-  )
-if(NOT CLANG_TIDY_EXE)
-  message(STATUS "clang-tidy not found.")
-else()
-  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-  set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*")
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+project(PBF_15418)
+option(USE_CUDA "enable CUDA in compilation" ON)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-if (CUDA)
-  enable_language(CUDA)
-endif()
+if (USE_CUDA)
+    set(CMAKE_CUDA_COMPILER "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/bin/nvcc.exe")
+    enable_language(CUDA)
+    message("CUDA enabled")
+
+    if (NOT DEFINED CMAKE_CUDA_STANDARD)
+        set(CMAKE_CUDA_STANDARD 14)
+        set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    endif ()
+endif ()
 
 find_package(GLFW3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
-# find_package(Gperftools REQUIRED)
 
 if (APPLE)
-  find_library(COCOA_LIBRARY Cocoa REQUIRED)
-endif()
-
-if (CUDA)
-  add_executable(PBF_15418
-                main.cpp 
-                config.h
-                glWindow.cpp 
-                glWindow.h 
-                shader.h 
-                glRenderer.cpp 
-                glRenderer.h 
-                ParticleSystemSerial.cpp
-                ParticleSystemSerial.h 
-                ParticleSystem.h 
-                Camera.h 
-                SOIL2.h 
-                Particle.h 
-                ParticleSystemCUDA.h 
-                ParticleSystemCUDA.cpp
-                ParticleSystemCUDA.cu)
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61 -std=c++11)
-else()
-  add_executable(PBF_15418
-                main.cpp 
-                config.h
-                glWindow.cpp 
-                glWindow.h 
-                shader.h 
-                glRenderer.cpp 
-                glRenderer.h 
-                ParticleSystemSerial.cpp
-                ParticleSystemSerial.h 
-                ParticleSystem.h 
-                Camera.h 
-                SOIL2.h 
-                Particle.h)
+    find_library(COCOA_LIBRARY Cocoa REQUIRED)
 endif ()
 
-target_compile_features(PBF_15418 PUBLIC 
-  cxx_std_14)
+add_library(particle_system_frontend
+        glWindow.cpp
+        glRenderer.cpp
+        ParticleSystemSerial.cpp)
 
-# target_compile_options(PBF_15418 PUBLIC
-#   -fopenmp 
-#   -Ofast
-# )
+target_include_directories(particle_system_frontend
+        PUBLIC
+        ${GLEW_INCLUDE_DIRS}
+        ${OPENGL_INCLUDE_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR})
 
-# target_link_libraries(PBF_15418
-#   -fopenmp
-#   -Ofast
-# )
+if (APPLE)
+    target_link_libraries(particle_system_frontend
+            ${COCOA_LIBRARY}
+            ${CMAKE_SOURCE_DIR}/lib/macos/libsoil2.a)
+elseif (MSVC)
+    if (${CMAKE_BUILD_TYPE})
 
-if(CLANG_TIDY_EXE)
-  set_target_properties(
-    PBF_15418 PROPERTIES
-    CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-  )
-endif()
+    endif ()
+    target_link_libraries(particle_system_frontend
+            ${CMAKE_SOURCE_DIR}/lib/windows/soil2-debug.lib)
+else ()
+    target_link_libraries(particle_system_frontend
+            ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
+endif ()
 
-target_include_directories(PBF_15418
-  PUBLIC
-  ${GLEW_INCLUDE_DIRS}
-  ${OPENGL_INCLUDE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR})
-  # ${Gperftools_INCLUDE_DIRS}
+target_link_libraries(particle_system_frontend
+        glfw
+        ${GLEW_LIBRARIES}
+        ${OPENGL_LIBRARIES})
 
-if(APPLE)
-  target_link_libraries(PBF_15418 
-  ${COCOA_LIBRARY}
-  ${CMAKE_SOURCE_DIR}/lib/libsoil2.a)
-else()
-  target_link_libraries(PBF_15418 
-  ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
-endif()
+if (MSVC)
+    target_compile_options(particle_system_frontend PRIVATE
+            /openmp
+            )
+else ()
+    target_compile_options(particle_system_frontend PRIVATE
+            -fopenmp
+            )
+endif ()
 
-target_link_libraries(PBF_15418 
-  glfw
-  ${GLEW_LIBRARIES} 
-  ${OPENGL_LIBRARIES})
-  # profiler)
+if (USE_CUDA)
+    set(executable_files
+            ParticleSystemCUDA.cu
+            ParticleSystemCUDAUtils.cu
+            main.cpp)
+else ()
+    set(executable_files main.cpp)
+endif ()
+
+add_executable(PBF_15418 ${executable_files})
+target_include_directories(PBF_15418 PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+add_dependencies(PBF_15418 particle_system_frontend)
+target_link_libraries(PBF_15418 particle_system_frontend)

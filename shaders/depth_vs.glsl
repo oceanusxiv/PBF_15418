@@ -11,7 +11,7 @@ uniform float pointRadius;
 uniform float pointScale;
 
 void main() {
-    vec4 viewPos = view * model * vec4(position, 1.0f);
+    vec4 viewPos = view * vec4(position, 1.0f);
     gl_Position = projection * viewPos;
     posEye = viewPos.xyz;
     gl_PointSize = pointScale*(pointRadius/gl_Position.w);

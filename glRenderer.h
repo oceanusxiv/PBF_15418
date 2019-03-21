@@ -5,7 +5,7 @@
 #ifndef PBF_15418_GLRENDERER_H
 #define PBF_15418_GLRENDERER_H
 
-#include <GL/glew.h>
+#include <gl/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>

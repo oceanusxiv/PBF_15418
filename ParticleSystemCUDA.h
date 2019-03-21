@@ -6,11 +6,10 @@
 #define PBF_15418_PARTICLESYSTEMCUDA_H
 
 #include <cuda_runtime.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#define GLM_FORCE_PURE
 #include "ParticleSystem.h"
 
 struct systemParams {
