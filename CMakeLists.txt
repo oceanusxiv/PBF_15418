@@ -15,7 +15,9 @@ option(USE_CUDA "enable CUDA in compilation" ON)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 if (USE_CUDA)
-    set(CMAKE_CUDA_COMPILER "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1/bin/nvcc.exe")
+    if(MSVC)
+      set(CMAKE_CUDA_COMPILER "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.1/bin/nvcc.exe")
+    endif()  
     enable_language(CUDA)
     message("CUDA enabled")
 
@@ -25,7 +27,7 @@ if (USE_CUDA)
     endif ()
 endif ()
 
-find_package(GLFW3 REQUIRED)
+find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
@@ -34,58 +36,34 @@ if (APPLE)
     find_library(COCOA_LIBRARY Cocoa REQUIRED)
 endif ()
 
-add_library(particle_system_frontend
-        glWindow.cpp
-        glRenderer.cpp
-        ParticleSystemSerial.cpp)
+add_library(frontend glWindow.cpp glRenderer.cpp)
 
-target_include_directories(particle_system_frontend
+target_include_directories(frontend
         PUBLIC
         ${GLEW_INCLUDE_DIRS}
-        ${OPENGL_INCLUDE_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR})
+        ${OPENGL_INCLUDE_DIR})
 
-if (APPLE)
-    target_link_libraries(particle_system_frontend
-            ${COCOA_LIBRARY}
-            ${CMAKE_SOURCE_DIR}/lib/macos/libsoil2.a)
-elseif (MSVC)
-    if (${CMAKE_BUILD_TYPE})
-
-    endif ()
-    target_link_libraries(particle_system_frontend
-            ${CMAKE_SOURCE_DIR}/lib/windows/soil2-debug.lib)
-else ()
-    target_link_libraries(particle_system_frontend
-            ${CMAKE_SOURCE_DIR}/lib/linux/libsoil2.a)
-endif ()
-
-target_link_libraries(particle_system_frontend
+target_link_libraries(frontend
         glfw
+        glm
         ${GLEW_LIBRARIES}
         ${OPENGL_LIBRARIES})
 
+add_library(particle_system_cpu ParticleSystemSerial.cpp)
+
 if (MSVC)
-    target_compile_options(particle_system_frontend PRIVATE
-            /openmp
-            )
+    target_compile_options(particle_system_cpu PRIVATE /openmp)
 else ()
-    target_compile_options(particle_system_frontend PRIVATE
-            -fopenmp
-            )
+    target_compile_options(particle_system_cpu PRIVATE -fopenmp)
 endif ()
+
+add_executable(PBF_15418 main.cpp)
+target_include_directories(PBF_15418 PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+
+target_link_libraries(PBF_15418 particle_system_cpu frontend)
 
 if (USE_CUDA)
-    set(executable_files
-            ParticleSystemCUDA.cu
-            ParticleSystemCUDAUtils.cu
-            main.cpp)
-else ()
-    set(executable_files main.cpp)
+    add_library(particle_system_gpu ParticleSystemCUDA.cu ParticleSystemCUDAUtils.cu)
+
+    target_link_libraries(PBF_15418 particle_system_gpu)
 endif ()
-
-add_executable(PBF_15418 ${executable_files})
-target_include_directories(PBF_15418 PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-
-add_dependencies(PBF_15418 particle_system_frontend)
-target_link_libraries(PBF_15418 particle_system_frontend)

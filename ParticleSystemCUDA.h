@@ -5,7 +5,7 @@
 #ifndef PBF_15418_PARTICLESYSTEMCUDA_H
 #define PBF_15418_PARTICLESYSTEMCUDA_H
 
-#include <cuda_runtime.h>
+#include <vector_types.h>
 #include <iostream>
 #include <unordered_map>
 #include <vector>

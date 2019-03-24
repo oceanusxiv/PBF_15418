@@ -5,7 +5,7 @@
 #ifndef PBF_15418_GLWINDOW_H
 #define PBF_15418_GLWINDOW_H
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <iostream>

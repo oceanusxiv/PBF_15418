@@ -3,6 +3,7 @@
 //
 
 #include "ParticleSystemCUDA.h"
+#include <cuda_runtime.h>
 #include <math.h>
 #include <random>
 

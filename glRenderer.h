@@ -5,13 +5,12 @@
 #ifndef PBF_15418_GLRENDERER_H
 #define PBF_15418_GLRENDERER_H
 
-#include <gl/glew.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "Camera.h"
 #include "ParticleSystem.h"
-#include "SOIL2.h"
 #include "shader.h"
 
 class glRenderer {
@@ -39,53 +38,8 @@ class glRenderer {
 #endif /* DEVICE_RENDER */
 
  private:
-  static inline GLuint loadTexture(GLchar* path) {
-    // Generate texture ID and load texture data
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    int width, height;
-    unsigned char* image =
-        SOIL_load_image(path, &width, &height, 0, SOIL_LOAD_RGB);
-    // Assign texture to ID
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    // Parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    SOIL_free_image_data(image);
-    return textureID;
-  }
-  static inline GLuint loadCubeMap(std::vector<std::string> faces) {
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height;
-    unsigned char* image;
-
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-    for (GLuint i = 0; i < faces.size(); i++) {
-      image =
-          SOIL_load_image(faces[i].c_str(), &width, &height, 0, SOIL_LOAD_RGB);
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
-                   0, GL_RGB, GL_UNSIGNED_BYTE, image);
-      SOIL_free_image_data(image);
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    return textureID;
-  }
+  static inline GLuint loadTexture(GLchar* path);
+  static inline GLuint loadCubeMap(std::vector<std::string> faces);
   void setupSkyBox();
   void drawSkyBox(glm::mat4 projection);
   void setupParticles();
