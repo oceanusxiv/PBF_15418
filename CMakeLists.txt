@@ -67,3 +67,11 @@ if (USE_CUDA)
 
     target_link_libraries(PBF_15418 particle_system_gpu)
 endif ()
+
+add_custom_command(TARGET PBF_15418 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:PBF_15418>/shaders)
+
+add_custom_command(TARGET PBF_15418 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/skybox $<TARGET_FILE_DIR:PBF_15418>/skybox)

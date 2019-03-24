@@ -17,74 +17,74 @@
 
 const GLfloat glRenderer::skyBoxVertices[108] = {
     // Positions
-    -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
-    1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f,
+    -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
 
-    -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f,
-    -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,
+    -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
+    -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
 
-    1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
 
-    -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,
+    -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f,
 
-    -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f,
+    -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f,
 
-    -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
-    1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
+    -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
+    1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f};
 
 const GLfloat glRenderer::quadVertices[18] = {
     -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-    -1.0f, 1.0f,  0.0f, 1.0f, -1.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+    -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
 };
 
-GLuint glRenderer::loadTexture(GLchar* path) {
-    // Generate texture ID and load texture data
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    int width, height, n;
-    unsigned char* image = stbi_load(path, &width, &height, &n, 0);
-    // Assign texture to ID
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
+GLuint glRenderer::loadTexture(GLchar *path) {
+  // Generate texture ID and load texture data
+  GLuint textureID;
+  glGenTextures(1, &textureID);
+  int width, height, n;
+  unsigned char *image = stbi_load(path, &width, &height, &n, 0);
+  // Assign texture to ID
+  glBindTexture(GL_TEXTURE_2D, textureID);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+               GL_UNSIGNED_BYTE, image);
+  glGenerateMipmap(GL_TEXTURE_2D);
 
-    // Parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    delete image;
-    return textureID;
+  // Parameters
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  delete image;
+  return textureID;
 }
 
 GLuint glRenderer::loadCubeMap(std::vector<std::string> faces) {
-    GLuint textureID;
-    glGenTextures(1, &textureID);
+  GLuint textureID;
+  glGenTextures(1, &textureID);
 
-    int width, height, n;
-    unsigned char* image;
+  int width, height, n;
+  unsigned char *image;
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-    for (GLuint i = 0; i < faces.size(); i++) {
-        image = stbi_load(faces[i].c_str(), &width, &height, &n, 0);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
-                     0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        delete image;
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+  for (GLuint i = 0; i < faces.size(); i++) {
+    image = stbi_load(faces[i].c_str(), &width, &height, &n, 0);
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
+                 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    delete image;
+  }
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-    return textureID;
+  return textureID;
 }
 
 int glRenderer::init() {
@@ -135,25 +135,22 @@ void glRenderer::setupSkyBox() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  std::vector<std::string> faces;
-  faces.push_back((srcPath + "skybox/right.jpg"));
-  faces.push_back((srcPath + "skybox/left.jpg"));
-  faces.push_back((srcPath + "skybox/top.jpg"));
-  faces.push_back((srcPath + "skybox/bottom.jpg"));
-  faces.push_back((srcPath + "skybox/back.jpg"));
-  faces.push_back((srcPath + "skybox/front.jpg"));
+  std::vector<std::string> faces =
+      {"skybox/right.jpg", "skybox/left.jpg", "skybox/top.jpg", "skybox/bottom.jpg", "skybox/back.jpg",
+       "skybox/front.jpg"};
+
   cubeMapTexture = loadCubeMap(faces);
 }
 
 void glRenderer::drawSkyBox(glm::mat4 projection) {
   // Draw skybox as last
   glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when
-                           // values are equal to depth buffer's content
+  // values are equal to depth buffer's content
   skyBoxShader.Use();
   glm::mat4 view =
       glm::mat4(glm::mat3(camera.GetViewMatrix()));  // Remove any translation
-                                                     // component of the view
-                                                     // matrix
+  // component of the view
+  // matrix
   glUniformMatrix4fv(glGetUniformLocation(skyBoxShader.Program, "view"), 1,
                      GL_FALSE, glm::value_ptr(view));
   glUniformMatrix4fv(glGetUniformLocation(skyBoxShader.Program, "projection"),
@@ -194,7 +191,7 @@ void glRenderer::setupQuad() {
   glGenBuffers(1, &quadVBO);
   glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices),
-               static_cast<const GLvoid*>(quadVertices), GL_STATIC_DRAW);
+               static_cast<const GLvoid *>(quadVertices), GL_STATIC_DRAW);
 
   glGenVertexArrays(1, &quadVAO);
   glBindVertexArray(quadVAO);
@@ -226,7 +223,7 @@ GLuint glRenderer::setupFBO(GLuint texture) {
 
 GLuint glRenderer::setupTexture() {
   GLint dims[4] = {0};
-  glGetIntegerv(GL_VIEWPORT, static_cast<GLint*>(dims));
+  glGetIntegerv(GL_VIEWPORT, static_cast<GLint *>(dims));
   GLint fbWidth = dims[2];
   GLint fbHeight = dims[3];
 

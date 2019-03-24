@@ -15,21 +15,19 @@
 
 class glRenderer {
  public:
-  glRenderer(int width, int height, Camera& camera, ParticleSystem& sim,
-             std::string srcPath)
-      : depthShader(srcPath + "shaders/depth_vs.glsl",
-                    srcPath + "shaders/depth_fs.glsl"),
-        skyBoxShader(srcPath + "shaders/skybox_vs.glsl",
-                     srcPath + "shaders/skybox_fs.glsl"),
-        blurShader(srcPath + "shaders/texture_vs.glsl",
-                   srcPath + "shaders/blur_fs.glsl"),
-        shadingShader(srcPath + "shaders/texture_vs.glsl",
-                      srcPath + "shaders/shading_fs.glsl"),
+  glRenderer(int width, int height, Camera &camera, ParticleSystem &sim)
+      : depthShader("shaders/depth_vs.glsl",
+                    "shaders/depth_fs.glsl"),
+        skyBoxShader("shaders/skybox_vs.glsl",
+                     "shaders/skybox_fs.glsl"),
+        blurShader("shaders/texture_vs.glsl",
+                   "shaders/blur_fs.glsl"),
+        shadingShader("shaders/texture_vs.glsl",
+                      "shaders/shading_fs.glsl"),
         width(width),
         height(height),
         camera(camera),
-        simulation(sim),
-        srcPath(srcPath) {}
+        simulation(sim) {}
   ~glRenderer();
   int init();
   void onDraw();
@@ -61,7 +59,6 @@ class glRenderer {
   int width, height;
   static const GLfloat skyBoxVertices[108];
   static const GLfloat quadVertices[18];
-  std::string srcPath;
 };
 
 #endif  // PBF_15418_GLRENDERER_H
