@@ -47,6 +47,8 @@ target_link_libraries(frontend
 
 add_library(particle_system_cpu ParticleSystemSerial.cpp)
 
+target_link_libraries(particle_system_cpu glm)
+
 if (MSVC)
     target_compile_options(particle_system_cpu PRIVATE /openmp)
 else ()
@@ -60,6 +62,8 @@ target_link_libraries(PBF_15418 particle_system_cpu frontend)
 
 if (USE_CUDA)
     add_library(particle_system_gpu ParticleSystemCUDA.cu ParticleSystemCUDAUtils.cu)
+
+	target_link_libraries(particle_system_gpu glm)
 
     target_link_libraries(PBF_15418 particle_system_gpu)
 endif ()
