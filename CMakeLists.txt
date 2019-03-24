@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
-if (APPLE)
-    set(CMAKE_C_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang)
-    set(CMAKE_CXX_COMPILER /usr/local/Cellar/llvm/5.0.0/bin/clang++)
-elseif (MSVC)
+
+enable_language(CXX)
+if (MSVC)
     set(CMAKE_TOOLCHAIN_FILE:PATH C:Utilities/vcpkg/scripts/buildsystems/vcpkg.cmake)
 endif ()
 
@@ -15,9 +14,6 @@ option(USE_CUDA "enable CUDA in compilation" ON)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 if (USE_CUDA)
-    if(MSVC)
-      set(CMAKE_CUDA_COMPILER "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.1/bin/nvcc.exe")
-    endif()  
     enable_language(CUDA)
     message("CUDA enabled")
 
