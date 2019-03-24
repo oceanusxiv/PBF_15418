@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
 
-enable_language(CXX)
-if (MSVC)
-    set(CMAKE_TOOLCHAIN_FILE:PATH C:Utilities/vcpkg/scripts/buildsystems/vcpkg.cmake)
+if (WIN32)
+    set(CMAKE_TOOLCHAIN_FILE "C:/Utilities/vcpkg/scripts/buildsystems/vcpkg.cmake")
+	message("On Windows, vcpkg toolchain file: " ${CMAKE_TOOLCHAIN_FILE})
 endif ()
 
 set(CMAKE_CXX_STANDARD 17)
